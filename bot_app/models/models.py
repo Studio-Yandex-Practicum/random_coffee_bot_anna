@@ -1,12 +1,12 @@
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import CheckConstraint, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
-                            mapped_column, relationship)
+                            mapped_column)
 
 MEETING = (
     'id: {id}, пользователь_1: {user_1} - пользователь_2: {user_2}'
 )
-USER = ('id пользователя: {user_id}, имя: {full_amount}, '
-        'фамилия: {invested_amount}, email: {fully_invested}, '
+USER = ('id пользователя: {user_id}, имя: {first_name}, '
+        'фамилия: {last_name}, email: {email}, '
         'участвует: {available}')
 
 
@@ -34,6 +34,10 @@ class User(Base):
 
 
 class Meeting(Base):
+    __table_args__ = (
+        UniqueConstraint('user_1', 'user_1'),
+        CheckConstraint('user_1 != user_2')
+    )
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_1: Mapped[int] = mapped_column(
         ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False
@@ -41,7 +45,6 @@ class Meeting(Base):
     user_2: Mapped[int] = mapped_column(ForeignKey(
         'user.user_id', ondelete='CASCADE'), nullable=False
     )
-    meeting: Mapped['User'] = relationship(backref='meeting')
 
     def __repr__(self):
         return MEETING.format(
