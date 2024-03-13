@@ -4,7 +4,7 @@ import pytz
 from aiogram import Bot, Dispatcher, types
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from core.config import settings
-from database.engine import create_db, drop_db, session_maker
+from database.engine import session_maker
 from handlers.admin import admin_router
 from handlers.base_commands import base_commands_router
 from handlers.user_registration import user_reg_router
@@ -19,11 +19,11 @@ timezone = pytz.timezone('Europe/Moscow')
 scheduler = AsyncIOScheduler(timezone=timezone)
 
 
-async def on_startup(bot):
-    run_param = False
-    if run_param:
-        await drop_db()
-    await create_db()
+# async def on_startup(bot):
+#     run_param = False
+#     if run_param:
+#         await drop_db()
+#     await create_db()
 
 
 async def on_shutdown(bot):
@@ -31,7 +31,7 @@ async def on_shutdown(bot):
 
 
 async def main():
-    dp.startup.register(on_startup)
+    # dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     dp.update.middleware(DataBaseSession(session_pool=session_maker))
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
