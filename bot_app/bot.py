@@ -1,50 +1,39 @@
-import pytz
-
 import asyncio
-from aiogram import Bot, Dispatcher
-from aiogram.filters import CommandStart
-from aiogram.types import Message
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from bot_app.core.config import settings
+import pytz
+from aiogram import Bot, Dispatcher, types
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from core.config import settings
+from database.engine import session_maker
+from handlers.admin import admin_router
+from handlers.base_commands import base_commands_router
+from handlers.user_registration import user_reg_router
+from middleware.dp import DataBaseSession
 
 bot = Bot(settings.bot_token)
 dp = Dispatcher()
+dp.include_router(user_reg_router)
+dp.include_router(base_commands_router)
+dp.include_router(admin_router)
 timezone = pytz.timezone('Europe/Moscow')
 scheduler = AsyncIOScheduler(timezone=timezone)
 
 
-@dp.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
-    await message.answer("Hi")
+async def on_startup(bot):
+    print('Бот запущен')
 
 
-async def send_messages_mon():
-    await bot.send_message(user_tg_id, 'Здесь будет рассылка по пн')
-
-
-async def send_messages_fri():
-    await bot.send_message(user_tg_id, 'Здесь будет рассылка по птн')
-
-
-def schedule_jobs_mon():
-    """Отправка рассылки по понедельникам."""
-    scheduler.add_job(send_messages_mon, trigger="cron",
-                      day_of_week='mon', hour=10, minute=30)
-
-
-def schedule_jobs_fri():
-    """Отправка рассылки по пятницам."""
-    scheduler.add_job(send_messages_mon, trigger="cron",
-                      day_of_week='fri', hour=10, minute=30)
+async def on_shutdown(bot):
+    print('Бот лег')
 
 
 async def main():
-    schedule_jobs_mon()
-    schedule_jobs_fri()
-    scheduler.start()
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
+    dp.update.middleware(DataBaseSession(session_pool=session_maker))
+    await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)  # необходимо убрать при размещении на сервере
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
 asyncio.run(main())

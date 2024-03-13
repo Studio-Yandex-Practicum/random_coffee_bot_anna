@@ -1,6 +1,8 @@
-from sqlalchemy import CheckConstraint, ForeignKey, String, UniqueConstraint
+from sqlalchemy import (Boolean, CheckConstraint, ForeignKey, Integer, String,
+                        UniqueConstraint)
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
                             mapped_column)
+
 
 MEETING = (
     'id: {id}, пользователь_1: {user_1} - пользователь_2: {user_2}'
@@ -17,19 +19,32 @@ class Base(DeclarativeBase):
 
 
 class User(Base):
-    user_id: Mapped[int] = mapped_column(primary_key=True)
-    first_name: Mapped[str] = mapped_column(String(150), nullable=False)
-    last_name: Mapped[str] = mapped_column(String(150), nullable=False)
-    email: Mapped[str] = mapped_column(String(13), nullable=False, unique=True)
-    available: Mapped[bool] = mapped_column(default=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, nullable=False
+    )
+    tg_id: Mapped[int] = mapped_column(
+        Integer, nullable=False, unique=True
+    )
+    name: Mapped[str] = mapped_column(
+        String(150), nullable=False
+    )
+    last_name: Mapped[str] = mapped_column(
+        String(150), nullable=False
+    )
+    mail: Mapped[str] = mapped_column(
+        String(150), nullable=False
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
 
     def __repr__(self):
         return USER.format(
             user_id=self.user_id,
-            first_name=self.first_name,
+            first_name=self.last_name,
             last_name=self.last_name,
-            email=self.email,
-            available=self.available
+            email=self.mail,
+            available=self.is_active
         )
 
 

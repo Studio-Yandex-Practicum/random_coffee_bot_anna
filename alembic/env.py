@@ -8,8 +8,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-
-from bot_app.models import Base
+from bot_app.database.models import Base
 
 load_dotenv('.env')
 
