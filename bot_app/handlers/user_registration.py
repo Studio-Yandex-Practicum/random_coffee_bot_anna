@@ -16,7 +16,7 @@ BACK = 'назад'
 NO_STEP = 'Предыдущего шага нет, введите имя напишите "отмена"'
 ADD_LAST_NAME = 'Введите фамилию'
 ADD_EMAIL = 'Введите почту'
-EMAIL_DOMAIN = 'mail.ru'
+EMAIL_DOMAIN = '@groupeseb'
 COMPLITE_MSG = 'Регистрация прошла успешно'
 INVALID_EMAIL = 'Вы ввели не корпаративную почту'
 

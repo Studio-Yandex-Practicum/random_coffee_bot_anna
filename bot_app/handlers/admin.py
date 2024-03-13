@@ -44,16 +44,11 @@ async def get_admin_commands(message: types.Message):
 async def get_user_list(message: types.Message, session: AsyncSession):
     """Получить список всех пользователей."""
     users = await orm_get_all(session)
-    # TODO: некрасиво данные выводит
-    user_list_str = "\n".join(
-        f"""id: {user.tg_id}
-        имя: {user.name}
-        фамилия: {user.last_name}
-        почта: {user.mail}
-        учавствует в рассылке: {user.is_active}"""
-        for user in users
-    )
-    await message.answer(user_list_str)
+    user_list_str = '\n'.join(repr(user) for user in users)
+    if user_list_str:
+        await message.answer(user_list_str)
+    else:
+        await message.answer(NOT_FOUND)
 
 
 @admin_router.message(StateFilter(None), F.text == DELETE_USER)

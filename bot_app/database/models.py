@@ -41,10 +41,10 @@ class User(Base):
     def __repr__(self):
         return USER.format(
             user_id=self.user_id,
-            first_name=self.first_name,
+            first_name=self.last_name,
             last_name=self.last_name,
-            email=self.email,
-            available=self.available
+            email=self.mail,
+            available=self.is_active
         )
 
 
