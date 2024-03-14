@@ -27,7 +27,7 @@ user_reg_router = Router()
 class AddUser(StatesGroup):
     name = State()
     last_name = State()
-    mail = State()
+    email = State()
 
     texts = {
         'AddUser:name': 'Введите имя заново:',
@@ -104,17 +104,17 @@ async def add_mail(message: types.Message, state: FSMContext):
     """Добавление почты."""
     await state.update_data(last_name=message.text)
     await message.answer(ADD_EMAIL)
-    await state.set_state(AddUser.mail)
+    await state.set_state(AddUser.email)
 
 
-@user_reg_router.message(AddUser.mail, F.text.contains(EMAIL_DOMAIN))
+@user_reg_router.message(AddUser.email, F.text.contains(EMAIL_DOMAIN))
 async def refister(
     message: types.Message,
     state: FSMContext,
     session: AsyncSession
 ):
     """Окончание регистрации."""
-    await state.update_data(mail=message.text)
+    await state.update_data(email=message.text)
     await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_KBRD)
     data = await state.get_data()
     data['tg_id'] = message.from_user.id
@@ -122,7 +122,7 @@ async def refister(
     await state.clear()
 
 
-@user_reg_router.message(AddUser.mail)
+@user_reg_router.message(AddUser.email)
 async def invalid_mail(message: types.Message, state: FSMContext):
     """Сообщение о неккоректной почте."""
     await message.answer(INVALID_EMAIL)

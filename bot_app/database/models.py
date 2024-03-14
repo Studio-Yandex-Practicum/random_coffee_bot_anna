@@ -7,9 +7,11 @@ from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
 MEETING = (
     'id: {id}, пользователь_1: {user_1} - пользователь_2: {user_2}'
 )
-USER = ('id пользователя: {id}, имя: {first_name}, '
-        'фамилия: {last_name}, email: {mail}, '
-        'участвует: {is_active}')
+USER = ('id пользователя: {id}, имя: {name}, '
+        'фамилия: {last_name}, email: {email}, '
+        'участвует: {is_active}, '
+        'tg_id: {tg_id}, '
+        'is_admin: {is_admin}')
 
 
 class Base(DeclarativeBase):
@@ -33,7 +35,7 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(
         String(150), nullable=False
     )
-    mail: Mapped[str] = mapped_column(
+    email: Mapped[str] = mapped_column(
         String(150), nullable=False
     )
     is_active: Mapped[bool] = mapped_column(
@@ -46,10 +48,12 @@ class User(Base):
     def __repr__(self):
         return USER.format(
             id=self.id,
-            first_name=self.last_name,
+            name=self.name,
             last_name=self.last_name,
-            email=self.mail,
-            available=self.is_active
+            email=self.email,
+            is_active=self.is_active,
+            tg_id=self.tg_id,
+            is_admin=self.is_admin,
         )
 
 

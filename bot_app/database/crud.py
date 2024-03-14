@@ -8,7 +8,7 @@ async def orm_add_user(session: AsyncSession, data: dict):
         tg_id=data["tg_id"],
         name=data["name"],
         last_name=data["last_name"],
-        mail=data["mail"],
+        email=data["email"],
     )
     session.add(obj)
     await session.commit()

@@ -1,8 +1,8 @@
-"""is_admin field added
+"""First migration
 
-Revision ID: 389ee4340672
+Revision ID: 7bcec251c8d0
 Revises: 
-Create Date: 2024-03-14 11:48:58.962825
+Create Date: 2024-03-14 16:20:44.703736
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '389ee4340672'
+revision: str = '7bcec251c8d0'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,7 +24,7 @@ def upgrade() -> None:
     sa.Column('tg_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=150), nullable=False),
     sa.Column('last_name', sa.String(length=150), nullable=False),
-    sa.Column('mail', sa.String(length=150), nullable=False),
+    sa.Column('email', sa.String(length=150), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_admin', sa.Boolean(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),

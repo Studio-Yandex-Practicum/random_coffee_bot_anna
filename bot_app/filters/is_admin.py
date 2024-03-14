@@ -8,4 +8,4 @@ class IsAdmin(Filter):
         pass
 
     async def __call__(self, message: types.Message, bot: Bot) -> bool:
-        return int(message.from_user.id) == 617537024  # поменять на свой тг id
+        return int(message.from_user.id) == 492396441  # поменять на свой тг id
