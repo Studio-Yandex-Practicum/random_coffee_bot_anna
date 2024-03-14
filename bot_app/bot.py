@@ -5,7 +5,7 @@ import asyncio
 import pytz
 from aiogram import Bot, Dispatcher, types
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from core.config import settings
+# from core.config import settings
 from database.engine import session_maker
 from handlers.admin import admin_router
 from handlers.base_commands import base_commands_router
