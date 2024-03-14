@@ -7,7 +7,7 @@ from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
 MEETING = (
     'id: {id}, пользователь_1: {user_1} - пользователь_2: {user_2}'
 )
-USER = ('id пользователя: {user_id}, имя: {first_name}, '
+USER = ('id пользователя: {id}, имя: {first_name}, '
         'фамилия: {last_name}, email: {email}, '
         'участвует: {available}')
 
@@ -23,9 +23,7 @@ class Base(DeclarativeBase):
 
 
 class User(Base):
-    # user_id: Mapped[int] = mapped_column(
-    #     Integer, primary_key=True, nullable=False
-    # )
+
     tg_id: Mapped[int] = mapped_column(
         Integer, nullable=False, unique=True
     )
@@ -60,7 +58,7 @@ class Meeting(Base):
         UniqueConstraint('user_1', 'user_1'),
         CheckConstraint('user_1 != user_2')
     )
-    # id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
     user_1: Mapped[int] = mapped_column(
         ForeignKey('user.id', ondelete='CASCADE'), nullable=False
     )
