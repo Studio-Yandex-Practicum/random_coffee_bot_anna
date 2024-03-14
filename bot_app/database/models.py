@@ -13,15 +13,19 @@ USER = ('id пользователя: {user_id}, имя: {first_name}, '
 
 
 class Base(DeclarativeBase):
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, nullable=False
+    )
+
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
 
 
 class User(Base):
-    user_id: Mapped[int] = mapped_column(
-        Integer, primary_key=True, nullable=False
-    )
+    # user_id: Mapped[int] = mapped_column(
+    #     Integer, primary_key=True, nullable=False
+    # )
     tg_id: Mapped[int] = mapped_column(
         Integer, nullable=False, unique=True
     )
@@ -36,6 +40,9 @@ class User(Base):
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True
+    )
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
     )
 
     def __repr__(self):
@@ -53,12 +60,12 @@ class Meeting(Base):
         UniqueConstraint('user_1', 'user_1'),
         CheckConstraint('user_1 != user_2')
     )
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    # id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_1: Mapped[int] = mapped_column(
-        ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False
+        ForeignKey('user.id', ondelete='CASCADE'), nullable=False
     )
     user_2: Mapped[int] = mapped_column(ForeignKey(
-        'user.user_id', ondelete='CASCADE'), nullable=False
+        'user.id', ondelete='CASCADE'), nullable=False
     )
 
     def __repr__(self):

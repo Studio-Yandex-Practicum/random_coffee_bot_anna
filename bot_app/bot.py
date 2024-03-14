@@ -1,5 +1,7 @@
-import asyncio
+import os
+from dotenv import load_dotenv
 
+import asyncio
 import pytz
 from aiogram import Bot, Dispatcher, types
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -10,7 +12,15 @@ from handlers.base_commands import base_commands_router
 from handlers.user_registration import user_reg_router
 from middleware.dp import DataBaseSession
 
-bot = Bot(settings.bot_token)
+
+load_dotenv()
+
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+
+bot = Bot(token=BOT_TOKEN)
+
+
+# bot = Bot(settings.bot_token)
 dp = Dispatcher()
 dp.include_router(user_reg_router)
 dp.include_router(base_commands_router)
