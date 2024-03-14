@@ -8,8 +8,8 @@ MEETING = (
     'id: {id}, пользователь_1: {user_1} - пользователь_2: {user_2}'
 )
 USER = ('id пользователя: {id}, имя: {first_name}, '
-        'фамилия: {last_name}, email: {email}, '
-        'участвует: {available}')
+        'фамилия: {last_name}, email: {mail}, '
+        'участвует: {is_active}')
 
 
 class Base(DeclarativeBase):
