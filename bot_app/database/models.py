@@ -47,7 +47,7 @@ class User(Base):
 
     def __repr__(self):
         return USER.format(
-            user_id=self.user_id,
+            id=self.id,
             first_name=self.last_name,
             last_name=self.last_name,
             email=self.mail,
