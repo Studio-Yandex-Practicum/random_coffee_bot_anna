@@ -14,9 +14,9 @@ def get_keyboard(
     of btns args for buttons you need.
     Example:
     get_keyboard(
-            "О нас",
-            "Регистрация",
-            "Приостановить общение",
+            'О нас',
+            'Регистрация',
+            'Приостановить общение',
             request_contact=4,
             sizes=(2, 2, 1)
         )
@@ -51,3 +51,15 @@ ADMIN_KBRD = get_keyboard(
 )
 
 REGISTER_KBRD = get_keyboard('Регистрация')
+
+NEXT_KBRD = get_keyboard(
+    'Следующий комментарий',
+    'Главное меню',
+    sizes=(2, )
+)
+
+MORE_KBRD = get_keyboard(
+    'Ещё комментарий',
+    'Главное меню',
+    sizes=(2, )
+)
