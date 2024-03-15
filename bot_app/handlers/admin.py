@@ -1,14 +1,14 @@
 """Администрирование телеграмм бота"""
-
 from aiogram import F, Router, types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from database.crud import orm_deactive_user, orm_delete_user, orm_get_all
-from filters.is_admin import IsAdmin
-from keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from database.crud import (activate_deactivate_user,
+                           orm_delete_user, orm_get_all)
+from filters.is_admin import IsAdmin
+from keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
 
 ADMIN_ONLY = 'Данные действия доступны только администратору'
 DELETE_COMPLITE = 'Пользователь удалён'
@@ -94,7 +94,7 @@ async def deactivate_user_id(
 ):
     """Деактивация пользователя по id."""
     await state.update_data(tg_id=message.text)
-    deactive = await orm_deactive_user(session, int(message.text))
+    deactive = await activate_deactivate_user(session, int(message.text))
     if deactive:
         await message.answer(
             DEACTIVATE_COMPLITE,
