@@ -30,26 +30,14 @@ async def orm_get_all(session: AsyncSession):
     return result.scalars().all()
 
 
-async def orm_deactive_user(session: AsyncSession, tg_id: int):
+async def activate_deactivate_user(session: AsyncSession, tg_id: int):
     result = await session.execute(select(User).filter(User.tg_id == tg_id))
     user = result.scalars().one_or_none()
     if user:
-        user.is_active = False
+        user.is_active = not user.is_active
         await session.commit()
         return True
-    else:
-        return False
-
-
-async def orm_activate_user(session: AsyncSession, tg_id: int):
-    result = await session.execute(select(User).filter(User.tg_id == tg_id))
-    user = result.scalars().one_or_none()
-    if user:
-        user.is_active = True
-        await session.commit()
-        return True
-    else:
-        return False
+    return False
 
 
 async def get_user_by_id(session: AsyncSession, tg_id: int):
