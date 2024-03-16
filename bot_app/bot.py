@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import asyncio
 import pytz
 from aiogram import Bot, Dispatcher, types
+from aiogram.enums import ParseMode
+from aiogram.client.bot import DefaultBotProperties
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # from core.config import settings
 from database.engine import session_maker
@@ -17,7 +19,8 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=BOT_TOKEN,
+          default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 
 # bot = Bot(settings.bot_token)
