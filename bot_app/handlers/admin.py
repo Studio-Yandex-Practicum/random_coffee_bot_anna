@@ -8,6 +8,7 @@ from database.crud import orm_deactive_user, orm_delete_user, orm_get_all
 from filters.is_admin import IsAdmin, admin_ids, add_admin_id
 from keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from database.models import User
 
 
@@ -25,6 +26,7 @@ ADD_USER_TO_ADMIN = 'Добавить пользователя в админы'
 ADD_EMAIL = 'Введите почту пользователя'
 SUCCESS = 'Пользователь стал администратором'
 NON_USER = 'Такого пользователя не существует'
+ADMIN_ALREADY = 'Этот пользователь уже администратор'
 
 
 admin_router = Router()
@@ -127,7 +129,8 @@ async def menu(message: types.Message):
 
 
 @admin_router.message(F.text == ADD_USER_TO_ADMIN)
-async def add_user_to_admin(message: types.Message, state: FSMContext):
+async def add_user_to_admin(message: types.Message, state: FSMContext,
+    session: AsyncSession):
     """Добавить пользователя в админы."""
     await state.update_data(email=message.text)
     await message.answer(ADD_EMAIL)
@@ -137,15 +140,18 @@ async def add_user_to_admin(message: types.Message, state: FSMContext):
 @admin_router.message(AddUserToAdmin.email)
 async def add_to_admin(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    session: AsyncSession
 ):
-    user: User = await User.get_or_none(email=message.text)
-    if user is None:
-        await message.answer(NON_USER)
-    else:
+    result = await session.execute(select(User).filter(User.email == message.text))
+    user = result.scalars().one_or_none()
+    if user:
         await state.update_data(email=message.text)
-        data = await state.get_data()
-        user: User = await User.filter(email=data['email'])
-        await add_admin_id(user.tg_id)
-        await message.answer(SUCCESS)
-        await state.clear()
+        if user.tg_id in admin_ids:
+            await message.answer(ADMIN_ALREADY)
+        else:
+            await add_admin_id(user.tg_id)
+            await message.answer(SUCCESS)
+            await state.clear()
+    else:
+        await message.answer(NON_USER)
