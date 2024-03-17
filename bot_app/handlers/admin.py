@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import User
 
 
-
 ADMIN_ONLY = 'Данные действия доступны только администратору'
 DELETE_COMPLITE = 'Пользователь удалён'
 NOT_FOUND = 'Пользователь не найден'
@@ -25,6 +24,7 @@ RETURN_TO_MENU = 'Вы вернулись в главное меню'
 ADD_USER_TO_ADMIN = 'Добавить пользователя в админы'
 ADD_EMAIL = 'Введите почту пользователя'
 SUCCESS = 'Пользователь стал администратором'
+NON_USER = 'Такого пользователя не существует'
 
 
 admin_router = Router()
@@ -139,9 +139,13 @@ async def add_to_admin(
     message: types.Message,
     state: FSMContext
 ):
-    await state.update_data(email=message.text)
-    data = await state.get_data()
-    user: User = await User.filter(email=data['email'])
-    await add_admin_id(user.tg_id)
-    await message.answer(SUCCESS)
-    await state.clear()
+    user: User = await User.get_or_none(email=message.text)
+    if user is None:
+        await message.answer(NON_USER)
+    else:
+        await state.update_data(email=message.text)
+        data = await state.get_data()
+        user: User = await User.filter(email=data['email'])
+        await add_admin_id(user.tg_id)
+        await message.answer(SUCCESS)
+        await state.clear()
