@@ -5,9 +5,11 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from database.crud import orm_deactive_user, orm_delete_user, orm_get_all
-from filters.is_admin import IsAdmin
+from filters.is_admin import IsAdmin, admin_ids, add_admin_id
 from keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
 from sqlalchemy.ext.asyncio import AsyncSession
+from database.models import User
+
 
 
 ADMIN_ONLY = 'Данные действия доступны только администратору'
@@ -20,6 +22,9 @@ DEACTIVATE_USER = 'Деактивировать пользователя'
 DEACTIVATE_COMPLITE = 'Пользователь дективирован'
 MAIN_MENU = 'Главное меню'
 RETURN_TO_MENU = 'Вы вернулись в главное меню'
+ADD_USER_TO_ADMIN = 'Добавить пользователя в админы'
+ADD_EMAIL = 'Введите почту пользователя'
+SUCCESS = 'Пользователь стал администратором'
 
 
 admin_router = Router()
@@ -34,10 +39,19 @@ class DeactiveUser(StatesGroup):
     tg_id = State()
 
 
-@admin_router.message(Command('admin'))
+class AddUserToAdmin(StatesGroup):
+    email = State()
+
+    texts = {
+        'AddUser:mail': 'Введите мэйл заново:',
+    }
+
+
+@admin_router.message(StateFilter(None), Command('admin'))
 async def get_admin_commands(message: types.Message):
     """Команда для администрирования пользователей."""
-    await message.answer(ADMIN_ONLY, reply_markup=ADMIN_KBRD)
+    if int(message.from_user.id) in admin_ids:
+        await message.answer(ADMIN_ONLY, reply_markup=ADMIN_KBRD)
 
 
 @admin_router.message(F.text == ALL_USERS)
@@ -110,3 +124,24 @@ async def deactivate_user_id(
 async def menu(message: types.Message):
     """Вернуться в главное меню."""
     await message.answer(RETURN_TO_MENU, reply_markup=MAIN_MENU_KBRD)
+
+
+@admin_router.message(F.text == ADD_USER_TO_ADMIN)
+async def add_user_to_admin(message: types.Message, state: FSMContext):
+    """Добавить пользователя в админы."""
+    await state.update_data(email=message.text)
+    await message.answer(ADD_EMAIL)
+    await state.set_state(AddUserToAdmin.email)
+
+
+@admin_router.message(AddUserToAdmin.email)
+async def add_to_admin(
+    message: types.Message,
+    state: FSMContext
+):
+    await state.update_data(email=message.text)
+    data = await state.get_data()
+    user: User = await User.filter(email=data['email'])
+    await add_admin_id(user.tg_id)
+    await message.answer(SUCCESS)
+    await state.clear()
