@@ -1,0 +1,8 @@
+version: '3.7'
+
+services:
+  telegram-bot:
+    build: .
+    environment:
+      - BOT_TOKEN=YOUR_BOT_TOKEN_HERE
+    restart: always
