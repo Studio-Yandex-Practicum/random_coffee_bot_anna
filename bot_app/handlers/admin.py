@@ -11,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database.models import User
 
+from loguru import logger
+
 
 ADMIN_ONLY = 'Данные действия доступны только администратору'
 DELETE_COMPLITE = 'Пользователь удалён'
@@ -25,6 +27,7 @@ RETURN_TO_MENU = 'Вы вернулись в главное меню'
 ADD_USER_TO_ADMIN = 'Добавить пользователя в админы'
 ADD_EMAIL = 'Введите почту пользователя'
 SUCCESS = 'Пользователь стал администратором'
+ANTI_SUCCESS = 'Пользователь перестал быть администратором'
 NON_USER = 'Такого пользователя не существует'
 ADMIN_ALREADY = 'Этот пользователь уже администратор'
 REMOVE_USER_FROM_ADMIN = 'Удалить пользователя из админов'
@@ -55,10 +58,7 @@ class AddUserToAdmin(StatesGroup):
 @admin_router.message(StateFilter(None), Command('admin'))
 async def get_admin_commands(message: types.Message, session: AsyncSession):
     """Команда для администрирования пользователей."""
-    result = await session.execute(select(User).filter(User.tg_id == message.from_user.id))
-    user = result.scalars().one_or_none()
-    if user.is_admin:
-        await message.answer(ADMIN_ONLY, reply_markup=ADMIN_KBRD)
+    await message.answer(ADMIN_ONLY, reply_markup=ADMIN_KBRD)
 
 
 @admin_router.message(F.text == ALL_USERS)
@@ -143,7 +143,7 @@ async def add_user_to_admin(message: types.Message, state: FSMContext,
 
 
 @admin_router.message(F.text == REMOVE_USER_FROM_ADMIN)
-async def add_user_to_admin(message: types.Message, state: FSMContext,
+async def remove_user_from_admin(message: types.Message, state: FSMContext,
     session: AsyncSession):
     """Удалить пользователя из админов."""
     await state.update_data(email=message.text)
@@ -163,7 +163,7 @@ async def add_to_admin(
         if user.is_admin == True:
             await message.answer(ADMIN_ALREADY)
         else:
-            user.is_admin == True
+            user.is_admin = True
             await session.commit()
             await message.answer(SUCCESS)
             await state.clear()
@@ -180,8 +180,9 @@ async def remove_from_admin(
     user = result.scalars().one_or_none()
     if user:
         if user.is_admin == True:
-            user.is_admin == False
+            user.is_admin = False
             await session.commit()
+            await message.answer(ANTI_SUCCESS)
         else:
             await message.answer(NON_USER_ADMIN)
     else:

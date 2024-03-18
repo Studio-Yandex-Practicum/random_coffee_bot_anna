@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database.models import User
 from core.config import settings
+from loguru import logger
 
 class IsAdmin(Filter):
     """Фильтр для админа."""
