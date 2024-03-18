@@ -5,8 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.crud import (activate_deactivate_user,
-                           orm_delete_user, orm_get_all)
+from database.models import user
 from filters.is_admin import IsAdmin
 from keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
 
@@ -43,8 +42,9 @@ async def get_admin_commands(message: types.Message):
 @admin_router.message(F.text == ALL_USERS)
 async def get_user_list(message: types.Message, session: AsyncSession):
     """Получить список всех пользователей."""
-    users = await orm_get_all(session)
-    user_list_str = '\n'.join(repr(user) for user in users)
+    user_list_str = '\n'.join(
+        repr(user) for user in await user.get_all(session)
+    )
     if user_list_str:
         await message.answer(user_list_str)
     else:
@@ -67,10 +67,9 @@ async def delete_user_id(
     state: FSMContext,
     session: AsyncSession
 ):
-    """Удаление пользователя по id."""
+    """Удаление пользователя по tg_id."""
     await state.update_data(tg_id=message.text)
-    delete = await orm_delete_user(session, int(message.text))
-    if delete:
+    if await user.remove(session, await user.get(session, int(message.text))):
         await message.answer(DELETE_COMPLITE, reply_markup=ADMIN_KBRD)
         await state.clear()
     message.answer(NOT_FOUND, reply_markup=ADMIN_KBRD)
@@ -94,7 +93,7 @@ async def deactivate_user_id(
 ):
     """Деактивация пользователя по id."""
     await state.update_data(tg_id=message.text)
-    deactive = await activate_deactivate_user(session, int(message.text))
+    deactive = await user.activate_deactivate_user(session, int(message.text))
     if deactive:
         await message.answer(
             DEACTIVATE_COMPLITE,
