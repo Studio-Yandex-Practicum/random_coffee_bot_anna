@@ -6,9 +6,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file='.env', env_file_encoding='utf-8'
     )
-    BOT_TOKEN: str = "6067823117:AAHhcr-xgoqZoHGmj-aW9oyfK6WOZuDM4w8"
-    DATABASE_URL: str = "sqlite+aiosqlite:///./random_coffe_bot.db"
-    GEN_ADMIN_ID: int = 117732520
+    bot_token: str = "6067823117:AAHhcr-xgoqZoHGmj-aW9oyfK6WOZuDM4w8"
+    database_url: str = "sqlite+aiosqlite:///./random_coffe_bot.db"
+    gen_admin_id: int
+
 
 settings = Settings()
 

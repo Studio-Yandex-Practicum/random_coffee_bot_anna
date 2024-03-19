@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database.models import User
 
-from loguru import logger
 
 
 ADMIN_ONLY = 'Данные действия доступны только администратору'
