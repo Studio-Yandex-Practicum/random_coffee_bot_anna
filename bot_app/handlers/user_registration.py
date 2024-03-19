@@ -19,6 +19,8 @@ ADD_EMAIL = 'Введите почту'
 EMAIL_DOMAIN = '@groupeseb'
 COMPLITE_MSG = 'Регистрация прошла успешно'
 INVALID_EMAIL = 'Вы ввели не корпаративную почту'
+NAME_RULES="Имя должно содержать только буквы. Пожалуйста, введите имя снова."
+LAST_NAME_RULES="Фамилия должна содержать только буквы. Пожалуйста, введите фамилию снова."
 
 
 user_reg_router = Router()
@@ -94,17 +96,27 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
 @user_reg_router.message(AddUser.name, F.text)
 async def add_last_name(message: types.Message, state: FSMContext):
     """Добавление фамилии."""
-    await state.update_data(name=message.text)
-    await message.answer(ADD_LAST_NAME)
-    await state.set_state(AddUser.last_name)
+    name = message.text
+    if check_alpha(name):
+        await state.update_data(name=name)
+        await message.answer(ADD_LAST_NAME)
+        await state.set_state(AddUser.last_name)
+    else:
+        await message.answer(NAME_RULES)
+        await state.set_state(AddUser.name)
 
 
 @user_reg_router.message(AddUser.last_name, F.text)
 async def add_mail(message: types.Message, state: FSMContext):
     """Добавление почты."""
-    await state.update_data(last_name=message.text)
-    await message.answer(ADD_EMAIL)
-    await state.set_state(AddUser.email)
+    last_name = message.text
+    if check_alpha(last_name):
+        await state.update_data(last_name=last_name)
+        await message.answer(ADD_EMAIL)
+        await state.set_state(AddUser.email)
+    else:
+        await message.answer(LAST_NAME_RULES)
+        await state.set_state(AddUser.last_name)
 
 
 @user_reg_router.message(AddUser.email, F.text.contains(EMAIL_DOMAIN))
@@ -126,3 +138,7 @@ async def refister(
 async def invalid_mail(message: types.Message, state: FSMContext):
     """Сообщение о неккоректной почте."""
     await message.answer(INVALID_EMAIL)
+
+
+def check_alpha(input_string):
+    return all(char.isalpha() or char.isspace() for char in input_string)

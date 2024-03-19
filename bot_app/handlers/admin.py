@@ -4,6 +4,9 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from database.models import User
+
 
 from database.crud import (activate_deactivate_user,
                            orm_delete_user, orm_get_all)
@@ -20,6 +23,14 @@ DEACTIVATE_USER = 'Деактивировать пользователя'
 DEACTIVATE_COMPLITE = 'Пользователь дективирован'
 MAIN_MENU = 'Главное меню'
 RETURN_TO_MENU = 'Вы вернулись в главное меню'
+ADD_USER_TO_ADMIN = 'Добавить пользователя в админы'
+ADD_EMAIL = 'Введите почту пользователя'
+SUCCESS = 'Пользователь стал администратором'
+ANTI_SUCCESS = 'Пользователь перестал быть администратором'
+NON_USER = 'Такого пользователя не существует'
+ADMIN_ALREADY = 'Этот пользователь уже администратор'
+REMOVE_USER_FROM_ADMIN = 'Удалить пользователя из админов'
+NON_USER_ADMIN = 'Этот пользователь не является админом'
 
 
 admin_router = Router()
@@ -34,8 +45,17 @@ class DeactiveUser(StatesGroup):
     tg_id = State()
 
 
-@admin_router.message(Command('admin'))
-async def get_admin_commands(message: types.Message):
+class AddUserToAdmin(StatesGroup):
+    email = State()
+    rem_email = State()
+
+    texts = {
+        'AddUser:mail': 'Введите мэйл заново:',
+    }
+
+
+@admin_router.message(StateFilter(None), Command('admin'))
+async def get_admin_commands(message: types.Message, session: AsyncSession):
     """Команда для администрирования пользователей."""
     await message.answer(ADMIN_ONLY, reply_markup=ADMIN_KBRD)
 
@@ -110,3 +130,59 @@ async def deactivate_user_id(
 async def menu(message: types.Message):
     """Вернуться в главное меню."""
     await message.answer(RETURN_TO_MENU, reply_markup=MAIN_MENU_KBRD)
+
+
+@admin_router.message(F.text == ADD_USER_TO_ADMIN)
+async def add_user_to_admin(message: types.Message, state: FSMContext,
+    session: AsyncSession):
+    """Добавить пользователя в админы."""
+    await state.update_data(email=message.text)
+    await message.answer(ADD_EMAIL)
+    await state.set_state(AddUserToAdmin.email)
+
+
+@admin_router.message(F.text == REMOVE_USER_FROM_ADMIN)
+async def remove_user_from_admin(message: types.Message, state: FSMContext,
+    session: AsyncSession):
+    """Удалить пользователя из админов."""
+    await state.update_data(email=message.text)
+    await message.answer(ADD_EMAIL)
+    await state.set_state(AddUserToAdmin.rem_email)
+
+
+@admin_router.message(AddUserToAdmin.email)
+async def add_to_admin(
+    message: types.Message,
+    state: FSMContext,
+    session: AsyncSession
+):
+    result = await session.execute(select(User).filter(User.email == message.text))
+    user = result.scalars().one_or_none()
+    if user:
+        if user.is_admin == True:
+            await message.answer(ADMIN_ALREADY)
+        else:
+            user.is_admin = True
+            await session.commit()
+            await message.answer(SUCCESS)
+            await state.clear()
+    else:
+        await message.answer(NON_USER)
+
+
+@admin_router.message(AddUserToAdmin.rem_email)
+async def remove_from_admin(
+    message: types.Message,
+    session: AsyncSession
+):
+    result = await session.execute(select(User).filter(User.email == message.text))
+    user = result.scalars().one_or_none()
+    if user:
+        if user.is_admin == True:
+            user.is_admin = False
+            await session.commit()
+            await message.answer(ANTI_SUCCESS)
+        else:
+            await message.answer(NON_USER_ADMIN)
+    else:
+        await message.answer(NON_USER)
