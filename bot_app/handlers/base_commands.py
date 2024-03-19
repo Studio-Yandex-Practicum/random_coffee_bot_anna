@@ -2,11 +2,11 @@ from aiogram import F, Router, types
 from aiogram.filters import CommandStart
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.crud import activate_deactivate_user
+from database.models import user
 from keyboards.reply import REGISTER_KBRD, NEXT_KBRD, MORE_KBRD, MAIN_MENU_KBRD
 from handlers.constants import constants
 
-
+START_MSG = 'Привет, я бот'
 ABOUT_PROJECT = 'О проекте'
 COMMENTS = 'Наши коллеги про'
 STOP_PARTICIPATE = 'Приостановить участие'
@@ -25,7 +25,7 @@ base_commands_router = Router()
 @base_commands_router.message(CommandStart())
 async def start(message: types.Message):
     """Команда /start."""
-    await message.answer(constants['START_MSG'], reply_markup=REGISTER_KBRD)
+    await message.answer(START_MSG, reply_markup=REGISTER_KBRD)
 
 
 @base_commands_router.message(F.text == ABOUT_PROJECT)
@@ -70,7 +70,7 @@ async def menu(message: types.Message):
 @base_commands_router.message(F.text == STOP_PARTICIPATE)
 async def stop(message: types.Message, session: AsyncSession):
     """Остановить участие."""
-    if await activate_deactivate_user(session, int(message.from_user.id)):
+    if await user.activate_deactivate_user(session, int(message.from_user.id)):
         await message.answer(constants['stop_participate_msg'])
     else:
         await message.answer(CANT_STOP)
@@ -79,7 +79,7 @@ async def stop(message: types.Message, session: AsyncSession):
 @base_commands_router.message(F.text == RESTART_PARTICIPATE)
 async def up(message: types.Message, session: AsyncSession):
     """Возобновить участие."""
-    if await activate_deactivate_user(session, int(message.from_user.id)):
+    if await user.activate_deactivate_user(session, int(message.from_user.id)):
         await message.answer(RESTART_PARTICIPATE_MSG)
     else:
         await message.answer(CANT_RESTART_PARTICIPATE)

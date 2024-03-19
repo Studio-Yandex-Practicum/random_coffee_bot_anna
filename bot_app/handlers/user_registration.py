@@ -2,7 +2,8 @@ from aiogram import F, Router, types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from database.crud import get_user_by_id, orm_add_user
+#from database.crud import get_user_by_id
+from database.models import user
 from keyboards.reply import REGISTER_KBRD, MAIN_MENU_KBRD
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,8 +20,6 @@ ADD_EMAIL = 'Введите почту'
 EMAIL_DOMAIN = '@groupeseb'
 COMPLITE_MSG = 'Регистрация прошла успешно'
 INVALID_EMAIL = 'Вы ввели не корпаративную почту'
-NAME_RULES="Имя должно содержать только буквы. Пожалуйста, введите имя снова."
-LAST_NAME_RULES="Фамилия должна содержать только буквы. Пожалуйста, введите фамилию снова."
 
 
 user_reg_router = Router()
@@ -45,8 +44,7 @@ async def add_name(
     session: AsyncSession
 ):
     """Начало регистрации пользователя."""
-    user = await get_user_by_id(session, int(message.from_user.id))
-    if user:
+    if await user.get(session, int(message.from_user.id)):
         await message.answer(
             CANT_REGISTER,
             reply_markup=MAIN_MENU_KBRD
@@ -96,27 +94,17 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
 @user_reg_router.message(AddUser.name, F.text)
 async def add_last_name(message: types.Message, state: FSMContext):
     """Добавление фамилии."""
-    name = message.text
-    if check_alpha(name):
-        await state.update_data(name=name)
-        await message.answer(ADD_LAST_NAME)
-        await state.set_state(AddUser.last_name)
-    else:
-        await message.answer(NAME_RULES)
-        await state.set_state(AddUser.name)
+    await state.update_data(name=message.text)
+    await message.answer(ADD_LAST_NAME)
+    await state.set_state(AddUser.last_name)
 
 
 @user_reg_router.message(AddUser.last_name, F.text)
 async def add_mail(message: types.Message, state: FSMContext):
     """Добавление почты."""
-    last_name = message.text
-    if check_alpha(last_name):
-        await state.update_data(last_name=last_name)
-        await message.answer(ADD_EMAIL)
-        await state.set_state(AddUser.email)
-    else:
-        await message.answer(LAST_NAME_RULES)
-        await state.set_state(AddUser.last_name)
+    await state.update_data(last_name=message.text)
+    await message.answer(ADD_EMAIL)
+    await state.set_state(AddUser.email)
 
 
 @user_reg_router.message(AddUser.email, F.text.contains(EMAIL_DOMAIN))
@@ -130,7 +118,7 @@ async def refister(
     await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_KBRD)
     data = await state.get_data()
     data['tg_id'] = message.from_user.id
-    await orm_add_user(session, data)
+    await user.create(session, data)
     await state.clear()
 
 
@@ -138,7 +126,3 @@ async def refister(
 async def invalid_mail(message: types.Message, state: FSMContext):
     """Сообщение о неккоректной почте."""
     await message.answer(INVALID_EMAIL)
-
-
-def check_alpha(input_string):
-    return all(char.isalpha() or char.isspace() for char in input_string)
