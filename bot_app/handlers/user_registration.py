@@ -9,16 +9,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 REGISTER = 'Регистрация'
 CANT_REGISTER = 'Вы уже зарегистрированы'
-ADD_NAME = 'Ведите своё имя'
-CANCEL = 'отмена'
+ADD_NAME = 'Введите своё имя'
+CANCEL = 'Отмена'
 CANCSEL_MSG = 'Действия отменены'
-BACK = 'назад'
+BACK = 'Назад'
 NO_STEP = 'Предыдущего шага нет, введите имя напишите "отмена"'
 ADD_LAST_NAME = 'Введите фамилию'
 ADD_EMAIL = 'Введите почту'
 EMAIL_DOMAIN = '@groupeseb'
 COMPLITE_MSG = 'Регистрация прошла успешно'
-INVALID_EMAIL = 'Вы ввели не корпаративную почту'
+INVALID_EMAIL = 'Вы ввели не корпоративную почту'
 
 
 user_reg_router = Router()
