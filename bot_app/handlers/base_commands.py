@@ -6,7 +6,7 @@ from database.crud import activate_deactivate_user
 from keyboards.reply import REGISTER_KBRD, NEXT_KBRD, MORE_KBRD, MAIN_MENU_KBRD
 from handlers.constants import constants
 
-START_MSG = 'Привет, я бот'
+
 ABOUT_PROJECT = 'О проекте'
 COMMENTS = 'Наши коллеги про'
 STOP_PARTICIPATE = 'Приостановить участие'
@@ -25,7 +25,7 @@ base_commands_router = Router()
 @base_commands_router.message(CommandStart())
 async def start(message: types.Message):
     """Команда /start."""
-    await message.answer(START_MSG, reply_markup=REGISTER_KBRD)
+    await message.answer(constants['START_MSG'], reply_markup=REGISTER_KBRD)
 
 
 @base_commands_router.message(F.text == ABOUT_PROJECT)
