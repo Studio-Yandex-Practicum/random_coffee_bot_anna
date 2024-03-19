@@ -2,7 +2,8 @@ from aiogram import F, Router, types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from database.crud import get_user_by_id, orm_add_user
+#from database.crud import get_user_by_id
+from database.models import user
 from keyboards.reply import REGISTER_KBRD, MAIN_MENU_KBRD
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -45,8 +46,7 @@ async def add_name(
     session: AsyncSession
 ):
     """Начало регистрации пользователя."""
-    user = await get_user_by_id(session, int(message.from_user.id))
-    if user:
+    if await user.get(session, int(message.from_user.id)):
         await message.answer(
             CANT_REGISTER,
             reply_markup=MAIN_MENU_KBRD
@@ -130,7 +130,7 @@ async def refister(
     await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_KBRD)
     data = await state.get_data()
     data['tg_id'] = message.from_user.id
-    await orm_add_user(session, data)
+    await user.create(session, data)
     await state.clear()
 
 

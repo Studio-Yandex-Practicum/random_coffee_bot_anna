@@ -1,5 +1,6 @@
 from sqlalchemy import (Boolean, CheckConstraint, ForeignKey, Integer, String,
-                        UniqueConstraint)
+                        select, UniqueConstraint)
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
                             mapped_column)
 
@@ -56,6 +57,44 @@ class User(Base):
             is_admin=self.is_admin,
         )
 
+    @staticmethod
+    async def create(session: AsyncSession, data: dict):
+        """Создать объект."""
+        session.add(User(**data))
+        await session.commit()
+
+    @staticmethod
+    async def remove(session: AsyncSession, db_obj):
+        """Удалить объект."""
+        await session.delete(db_obj)
+        await session.commit()
+        return db_obj
+
+    @staticmethod
+    async def get(session: AsyncSession, tg_id: int):
+        """Получение объекта по tg_id"""
+        db_obj = await session.execute(select(User).where(User.tg_id == tg_id))
+        return db_obj.scalars().one_or_none()
+
+    @staticmethod
+    async def get_all(session: AsyncSession):
+        """Получение всех объектов."""
+        users = await session.execute(select(User))
+        return users.scalars().all()
+
+    @staticmethod
+    async def activate_deactivate_user(session: AsyncSession, tg_id: int):
+        """Активировать/деактивировать объект."""
+        result = await session.execute(
+            select(User).filter(User.tg_id == tg_id)
+        )
+        obj = result.scalars().one_or_none()
+        if obj:
+            obj.is_active = not obj.is_active
+            await session.commit()
+            return True
+        return False
+
 
 class Meeting(Base):
     __table_args__ = (
@@ -76,3 +115,6 @@ class Meeting(Base):
             user_1=self.user_1,
             user_2=self.user_2,
         )
+
+
+user = User()
