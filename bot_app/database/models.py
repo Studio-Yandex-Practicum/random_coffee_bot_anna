@@ -45,6 +45,9 @@ class User(Base):
     is_admin: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
     )
+    is_sent: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
 
     def __repr__(self):
         return USER.format(
@@ -94,6 +97,18 @@ class User(Base):
             await session.commit()
             return True
         return False
+
+    @staticmethod
+    async def get_all_activated(session: AsyncSession):
+        """Получение всех активных объектов."""
+        result = await session.execute(select(User).filter(User.is_active == 1))
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_all_is_sent(session: AsyncSession):
+        """Получение всех обеъектов, кому сделана рассылка."""
+        result = await session.execute(select(User).filter(User.is_sent == 1))
+        return result.scalars().all()
 
 
 class Meeting(Base):
