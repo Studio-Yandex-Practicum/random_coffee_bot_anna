@@ -5,11 +5,12 @@ from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
                             mapped_column)
 
 
-USER = ('id пользователя: {id}, имя: {name}, '
-        'фамилия: {last_name}, email: {email}, '
-        'участвует: {is_active}, '
-        'tg_id: {tg_id}, '
-        'is_admin: {is_admin}')
+USER = ('{name} '
+        '{last_name}, '
+        '{email}, '
+        '{tg_id}, '
+        '{is_active}'
+        '{is_admin}')
 
 
 class Base(DeclarativeBase):
@@ -47,14 +48,16 @@ class User(Base):
     )
 
     def __repr__(self):
+        is_admin_text = ', админ' if self.is_admin else ''
+        is_active_text = 'активен' if self.is_admin else 'неактивен'
         return USER.format(
             id=self.id,
             name=self.name,
             last_name=self.last_name,
             email=self.email,
-            is_active=self.is_active,
+            is_active=is_active_text,
             tg_id=self.tg_id,
-            is_admin=self.is_admin,
+            is_admin=is_admin_text,
         )
 
     @staticmethod
