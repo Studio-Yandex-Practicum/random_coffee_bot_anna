@@ -2,10 +2,11 @@ from aiogram import F, Router, types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-#from database.crud import get_user_by_id
-from database.models import user
-from keyboards.reply import REGISTER_KBRD, MAIN_MENU_KBRD
 from sqlalchemy.ext.asyncio import AsyncSession
+#from database.crud import get_user_by_id
+
+from bot_app.database.models import user
+from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_KBRD
 
 
 REGISTER = 'Регистрация'

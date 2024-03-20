@@ -5,12 +5,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from database.models import User
 
-
-from database.models import user
-from filters.is_admin import IsAdmin
-from keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
+from bot_app.database.models import User
+from bot_app.database.models import user
+from bot_app.filters.is_admin import IsAdmin
+from bot_app.keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
 
 ADMIN_ONLY = 'Данные действия доступны только администратору'
 DELETE_COMPLITE = 'Пользователь удалён'
