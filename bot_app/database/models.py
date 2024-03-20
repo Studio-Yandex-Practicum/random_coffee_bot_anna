@@ -107,5 +107,11 @@ class User(Base):
         result = await session.execute(select(User).filter(User.is_sent == 1))
         return result.scalars().all()
 
+    @staticmethod
+    async def get_first(session: AsyncSession):
+        """Получение первого объекта из БД."""
+        result = await session.execute(select(User).limit(1))
+        return result.scalars().one_or_none()
+
 
 user = User()
