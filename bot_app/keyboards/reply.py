@@ -67,3 +67,9 @@ MORE_KBRD = get_keyboard(
     'Главное меню',
     sizes=[2, ]
 )
+
+CANCEL_KBRD = get_keyboard(
+    'Отмена',
+    'Назад',
+    sizes=[2, ]
+)

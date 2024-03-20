@@ -10,7 +10,7 @@ from bot_app.handlers.base_commands import base_commands_router
 from bot_app.handlers.user_registration import user_reg_router
 from bot_app.handlers.callbacks_handler import callback_router
 from bot_app.middleware.dp import DataBaseSession
-from bot_app.mailing.mailing import meeting_mailing, meeting_reminder_mailing
+from bot_app.mailing.mailing import meeting_reminder_mailing
 
 
 async def on_startup():
@@ -35,8 +35,8 @@ async def main() -> None:
     scheduler = AsyncIOScheduler(timezone=timezone)
 
     sql_session = await anext(get_async_session())
-    # scheduler.add_job(meeting_mailing, args=(sql_session,), trigger='cron1, day_of_week='mon', hour=10, minute=30)
-    scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
+    scheduler.add_job(meeting_reminder_mailing,
+                      args=(sql_session,), trigger='cron',
                       day_of_week='fri', hour=10, minute=30)
     scheduler.start()
 
