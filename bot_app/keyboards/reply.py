@@ -1,3 +1,5 @@
+from typing import List
+
 from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -7,7 +9,7 @@ def get_keyboard(
     placeholder: str = None,
     request_contact: int = None,
     request_location: int = None,
-    sizes: tuple[int] = (2,),
+    sizes: List[int] = [2],
 ):
     '''
     Parameters request_contact and request_location must be as indexes
@@ -38,7 +40,7 @@ MAIN_MENU_KBRD = get_keyboard(
     'Наши коллеги про проект «Кофе вслепую»',
     'Приостановить участие',
     'Возобновить участие',
-    sizes=(1, 1, 2)
+    sizes=[1, 1, 2]
 )
 
 
@@ -47,7 +49,9 @@ ADMIN_KBRD = get_keyboard(
     'Удалить пользователя',
     'Деактивировать пользователя',
     'Главное меню',
-    sizes=(2, 2)
+    'Добавить пользователя в админы',
+    'Удалить пользователя из админов',
+    sizes=[2, 2]
 )
 
 REGISTER_KBRD = get_keyboard('Регистрация')
@@ -55,11 +59,11 @@ REGISTER_KBRD = get_keyboard('Регистрация')
 NEXT_KBRD = get_keyboard(
     'Следующий комментарий',
     'Главное меню',
-    sizes=(2, )
+    sizes=[2, ]
 )
 
 MORE_KBRD = get_keyboard(
     'Ещё комментарий',
     'Главное меню',
-    sizes=(2, )
+    sizes=[2, ]
 )
