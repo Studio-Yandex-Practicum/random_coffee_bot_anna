@@ -49,7 +49,7 @@ class User(Base):
 
     def __repr__(self):
         is_admin_text = ', админ' if self.is_admin else ''
-        is_active_text = 'активен' if self.is_admin else 'неактивен'
+        is_active_text = 'активен' if self.is_active else 'неактивен'
         return USER.format(
             id=self.id,
             name=self.name,
