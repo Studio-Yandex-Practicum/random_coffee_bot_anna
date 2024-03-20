@@ -6,11 +6,11 @@ from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
 
 
 USER = ('{name} '
-        '{last_name}, '
-        '{email}, '
-        '{tg_id}, '
+        '{last_name}\n'
+        '{email}\n'
+        '{tg_id}\n'
         '{is_active}'
-        '{is_admin}')
+        '{is_admin}\n')
 
 
 class Base(DeclarativeBase):
