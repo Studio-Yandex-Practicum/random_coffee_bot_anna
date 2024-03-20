@@ -2,9 +2,9 @@ from aiogram import F, Router, types
 from aiogram.filters import CommandStart
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import user
-from keyboards.reply import REGISTER_KBRD, NEXT_KBRD, MORE_KBRD, MAIN_MENU_KBRD
-from handlers.constants import constants
+from bot_app.database.models import user
+from bot_app.keyboards.reply import REGISTER_KBRD, NEXT_KBRD, MORE_KBRD, MAIN_MENU_KBRD
+from bot_app.handlers.constants import constants
 
 
 ABOUT_PROJECT = 'О проекте'
