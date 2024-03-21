@@ -8,7 +8,6 @@ from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
 USER = ('{name} '
         '{last_name}\n'
         '{email}\n'
-        '{tg_id}\n'
         '{is_active}'
         '{is_admin}\n')
 
@@ -80,16 +79,22 @@ class User(Base):
         return db_obj.scalars().one_or_none()
 
     @staticmethod
+    async def get_by_email(session: AsyncSession, email: str):
+        """Получение объекта по email."""
+        db_obj = await session.execute(select(User).where(User.email == email))
+        return db_obj.scalars().one_or_none()
+
+    @staticmethod
     async def get_all(session: AsyncSession):
         """Получение всех объектов."""
         users = await session.execute(select(User))
         return users.scalars().all()
 
     @staticmethod
-    async def activate_deactivate_user(session: AsyncSession, tg_id: int):
+    async def activate_deactivate_user(session: AsyncSession, email: str):
         """Активировать/деактивировать объект."""
         result = await session.execute(
-            select(User).filter(User.tg_id == tg_id)
+            select(User).filter(User.email == email)
         )
         obj = result.scalars().one_or_none()
         if obj:
