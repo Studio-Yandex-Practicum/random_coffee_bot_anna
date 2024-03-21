@@ -9,7 +9,7 @@ from sqlalchemy import select
 from bot_app.database.models import User
 from bot_app.database.models import user
 from bot_app.filters.is_admin import IsAdmin
-from bot_app.keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
+from bot_app.keyboards.reply import ADMIN_KBRD, MAIN_MENU_ACTIVE_KBRD
 
 ADMIN_ONLY = 'Данные действия доступны только администратору'
 DELETE_COMPLITE = 'Пользователь удалён'
@@ -127,7 +127,10 @@ async def deactivate_user_id(
 @admin_router.message(F.text == MAIN_MENU)
 async def menu(message: types.Message):
     """Вернуться в главное меню."""
-    await message.answer(RETURN_TO_MENU, reply_markup=MAIN_MENU_KBRD)
+    await message.answer(
+        RETURN_TO_MENU,
+        reply_markup=MAIN_MENU_ACTIVE_KBRD
+    )
 
 
 @admin_router.message(F.text == ADD_USER_TO_ADMIN)
