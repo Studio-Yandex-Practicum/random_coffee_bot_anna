@@ -34,7 +34,7 @@ class User(Base):
         String(150), nullable=False
     )
     email: Mapped[str] = mapped_column(
-        String(150), nullable=False
+        String(150), nullable=False, unique=True
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True
