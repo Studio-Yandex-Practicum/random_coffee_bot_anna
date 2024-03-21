@@ -1,8 +1,7 @@
-from sqlalchemy import (Boolean, CheckConstraint, ForeignKey, Integer, String,
-                        select, UniqueConstraint)
+from sqlalchemy import Boolean, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
-                            mapped_column)
+                            make_transient, mapped_column)
 
 
 USER = ('{name} '
@@ -116,10 +115,21 @@ class User(Base):
         return result.scalars().all()
 
     @staticmethod
-    async def get_first(session: AsyncSession):
-        """Получение первого объекта из БД."""
-        result = await session.execute(select(User).limit(1))
+    async def first_active(session: AsyncSession):
+        """Получение первого объекта со статусом активный из БД."""
+        result = await session.execute(
+            select(User).where(User.is_active == 1).limit(1)
+        )
         return result.scalars().one_or_none()
+
+    @staticmethod
+    async def rewrite(session: AsyncSession, obj):
+        await user.remove(session, obj)
+        obj.id = None
+        session.expunge(obj)
+        make_transient(obj)
+        session.add(obj)
+        await session.commit()
 
 
 user = User()
