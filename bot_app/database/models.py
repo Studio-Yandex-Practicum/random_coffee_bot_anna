@@ -108,9 +108,9 @@ class User(Base):
         return result.scalars().all()
 
     @staticmethod
-    async def get_first(session: AsyncSession):
+    async def get_first_active(session: AsyncSession):
         """Получение первого объекта из БД."""
-        result = await session.execute(select(User).limit(1))
+        result = await session.execute(select(User).filter(User.is_active == 1).limit(1))
         return result.scalars().one_or_none()
 
 

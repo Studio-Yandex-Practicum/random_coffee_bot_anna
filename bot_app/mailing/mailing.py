@@ -6,6 +6,7 @@ from aiogram.types.inline_keyboard_button import InlineKeyboardButton
 
 from bot_app.core.config import bot
 from bot_app.database.models import User
+from bot_app.mailing.distribution import change_is_sent_status_false
 
 MEETING_MESSAGE = '''
 Ваша пара для Кофе вслепую {} {} ({}).
@@ -48,5 +49,6 @@ async def meeting_mailing(meetings_pairs: List[Tuple[User, User]] = None):
 
 async def meeting_reminder_mailing(session: AsyncSession):
     users = await User.get_all_is_sent(session)
+    change_is_sent_status_false(users, session)
     for user in users:
         await mailing_by_user_tg_id(chat_id=user.tg_id, text=REMINDER_MAILING, inline_buttons=meet_inline_buttons)
