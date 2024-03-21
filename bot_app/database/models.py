@@ -5,11 +5,11 @@ from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
                             mapped_column)
 
 
-USER = ('id пользователя: {id}, имя: {name}, '
-        'фамилия: {last_name}, email: {email}, '
-        'участвует: {is_active}, '
-        'tg_id: {tg_id}, '
-        'is_admin: {is_admin}')
+USER = ('{name} '
+        '{last_name}\n'
+        '{email}\n'
+        '{is_active}'
+        '{is_admin}\n')
 
 
 class Base(DeclarativeBase):
@@ -47,14 +47,16 @@ class User(Base):
     )
 
     def __repr__(self):
+        is_admin_text = ', админ' if self.is_admin else ''
+        is_active_text = 'активен' if self.is_active else 'неактивен'
         return USER.format(
             id=self.id,
             name=self.name,
             last_name=self.last_name,
             email=self.email,
-            is_active=self.is_active,
+            is_active=is_active_text,
             tg_id=self.tg_id,
-            is_admin=self.is_admin,
+            is_admin=is_admin_text,
         )
 
     @staticmethod
@@ -77,16 +79,22 @@ class User(Base):
         return db_obj.scalars().one_or_none()
 
     @staticmethod
+    async def get_by_email(session: AsyncSession, email: str):
+        """Получение объекта по email."""
+        db_obj = await session.execute(select(User).where(User.email == email))
+        return db_obj.scalars().one_or_none()
+
+    @staticmethod
     async def get_all(session: AsyncSession):
         """Получение всех объектов."""
         users = await session.execute(select(User))
         return users.scalars().all()
 
     @staticmethod
-    async def activate_deactivate_user(session: AsyncSession, tg_id: int):
+    async def activate_deactivate_user(session: AsyncSession, email: str):
         """Активировать/деактивировать объект."""
         result = await session.execute(
-            select(User).filter(User.tg_id == tg_id)
+            select(User).filter(User.email == email)
         )
         obj = result.scalars().one_or_none()
         if obj:
