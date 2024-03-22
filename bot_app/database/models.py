@@ -1,15 +1,17 @@
-from sqlalchemy import (Boolean, CheckConstraint, ForeignKey, Integer, String,
-                        select, UniqueConstraint)
+from typing import List, Optional
+
+from sqlalchemy.orm.session import make_transient
+from sqlalchemy import (Boolean, Integer, String, select)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
                             mapped_column)
 
 
-USER = ('id пользователя: {id}, имя: {name}, '
-        'фамилия: {last_name}, email: {email}, '
-        'участвует: {is_active}, '
-        'tg_id: {tg_id}, '
-        'is_admin: {is_admin}')
+USER = ('{name} '
+        '{last_name}\n'
+        '{email}\n'
+        '{is_active}'
+        '{is_admin}\n')
 
 
 class Base(DeclarativeBase):
@@ -47,14 +49,16 @@ class User(Base):
     )
 
     def __repr__(self):
+        is_admin_text = ', админ' if self.is_admin else ''
+        is_active_text = 'активен' if self.is_active else 'неактивен'
         return USER.format(
             id=self.id,
             name=self.name,
             last_name=self.last_name,
             email=self.email,
-            is_active=self.is_active,
+            is_active=is_active_text,
             tg_id=self.tg_id,
-            is_admin=self.is_admin,
+            is_admin=is_admin_text,
         )
 
     @staticmethod
@@ -107,11 +111,31 @@ class User(Base):
         result = await session.execute(select(User).filter(User.is_sent == 1))
         return result.scalars().all()
 
+    # @staticmethod
+    # async def get_first_active(session: AsyncSession):
+    #     """Получение первого объекта из БД."""
+    #     result = await session.execute(select(User).filter(User.is_active == 1).limit(1))
+    #     return result.scalars().one_or_none()
+
     @staticmethod
-    async def get_first_active(session: AsyncSession):
-        """Получение первого объекта из БД."""
-        result = await session.execute(select(User).filter(User.is_active == 1).limit(1))
-        return result.scalars().one_or_none()
+    async def first_to_end_db(user, session: AsyncSession):
+        await User.remove(session, user)
+        user.id = None
+        session.expunge(user)
+        make_transient(user)
+        session.add(user)
+        await session.commit()
 
+    @staticmethod
+    async def set_is_sent_status_true(users: List, session: AsyncSession):
+        if len(users) > 0:
+            for sent in users:
+                sent.is_sent = True if not sent.is_sent else sent.is_sent
+            await session.commit()
 
-user = User()
+    @staticmethod
+    async def set_is_sent_status_false(users: Optional[List], session: AsyncSession):
+        if users is not None:
+            for sent in users:
+                sent.is_sent = False
+            await session.commit()
