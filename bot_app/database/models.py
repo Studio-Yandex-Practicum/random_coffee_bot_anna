@@ -1,9 +1,9 @@
+from core.config import settings
 from sqlalchemy import (Boolean, CheckConstraint, ForeignKey, Integer, String,
-                        select, UniqueConstraint)
+                        UniqueConstraint, select)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
                             mapped_column)
-
 
 USER = ('{name} '
         '{last_name}\n'
@@ -64,6 +64,12 @@ class User(Base):
     async def create(session: AsyncSession, data: dict):
         """Создать объект."""
         session.add(User(**data))
+        result = await session.execute(
+            select(User).filter(User.tg_id == settings.gen_admin_id)
+        )
+        obj = result.scalars().one_or_none()
+        if obj:
+            obj.is_admin = True
         await session.commit()
 
     @staticmethod
