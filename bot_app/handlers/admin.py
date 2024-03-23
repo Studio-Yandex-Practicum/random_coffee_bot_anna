@@ -35,11 +35,11 @@ admin_router.message.filter(IsAdmin())
 
 
 class DelUser(StatesGroup):
-    tg_id = State()
+    email = State()
 
 
 class DeactiveUser(StatesGroup):
-    tg_id = State()
+    email = State()
 
 
 class AddUserToAdmin(StatesGroup):
@@ -71,47 +71,47 @@ async def get_user_list(message: types.Message, session: AsyncSession):
 
 @admin_router.message(StateFilter(None), F.text == DELETE_USER)
 async def delete_user(message: types.Message, state: FSMContext):
-    """Удалить пользователя. Ожидание id пользователя"""
+    """Удалить пользователя. Ожидание email пользователя"""
     await message.answer(
-        ADD_ID,
+        ADD_EMAIL,
         reply_markup=types.ReplyKeyboardRemove()
     )
-    await state.set_state(DelUser.tg_id)
+    await state.set_state(DelUser.email)
 
 
-@admin_router.message(DelUser.tg_id, F.text)
+@admin_router.message(DelUser.email, F.text)
 async def delete_user_id(
     message: types.Message,
     state: FSMContext,
     session: AsyncSession
 ):
-    """Удаление пользователя по tg_id."""
-    await state.update_data(tg_id=message.text)
-    if await User.remove(session, await User.get(session, int(message.text))):
+    """Удаление пользователя по email."""
+    await state.update_data(email=message.text)
+    if await User.remove(session, await User.get_by_email(session, message.text)):
         await message.answer(DELETE_COMPLITE, reply_markup=ADMIN_KBRD)
         await state.clear()
     message.answer(NOT_FOUND, reply_markup=ADMIN_KBRD)
 
 
 @admin_router.message(
-    StateFilter(None),
-    F.text == DEACTIVATE_USER
+        StateFilter(None),
+        F.text == DEACTIVATE_USER
 )
 async def deactive_user(message: types.Message, state: FSMContext):
-    """Деактивировать пользователя. Ожидание id пользователя"""
-    await message.answer(ADD_ID, reply_markup=types.ReplyKeyboardRemove())
-    await state.set_state(DeactiveUser.tg_id)
+    """Деактивировать пользователя. Ожидание email пользователя."""
+    await message.answer(ADD_EMAIL, reply_markup=types.ReplyKeyboardRemove())
+    await state.set_state(DeactiveUser.email)
 
 
-@admin_router.message(DeactiveUser.tg_id, F.text)
+@admin_router.message(DeactiveUser.email, F.text)
 async def deactivate_user_id(
     message: types.Message,
     state: FSMContext,
     session: AsyncSession
 ):
-    """Деактивация пользователя по id."""
-    await state.update_data(tg_id=message.text)
-    deactive = await User.activate_deactivate_user(session, int(message.text))
+    """Деактивация пользователя по email."""
+    await state.update_data(email=message.text)
+    deactive = await User.activate_deactivate_user(session, message.text)
     if deactive:
         await message.answer(
             DEACTIVATE_COMPLITE,

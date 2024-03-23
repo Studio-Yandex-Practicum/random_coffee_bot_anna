@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from asyncpg import DatabaseDroppedError
 from sqlalchemy.orm.session import make_transient
 from sqlalchemy import (Boolean, Integer, String, select)
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -87,10 +88,10 @@ class User(Base):
         return users.scalars().all()
 
     @staticmethod
-    async def activate_deactivate_user(session: AsyncSession, tg_id: int):
+    async def activate_deactivate_user(session: AsyncSession, email: str):
         """Активировать/деактивировать объект."""
         result = await session.execute(
-            select(User).filter(User.tg_id == tg_id)
+            select(User).filter(User.email == email)
         )
         obj = result.scalars().one_or_none()
         if obj:
@@ -110,12 +111,6 @@ class User(Base):
         """Получение всех обеъектов, кому сделана рассылка."""
         result = await session.execute(select(User).filter(User.is_sent == 1))
         return result.scalars().all()
-
-    # @staticmethod
-    # async def get_first_active(session: AsyncSession):
-    #     """Получение первого объекта из БД."""
-    #     result = await session.execute(select(User).filter(User.is_active == 1).limit(1))
-    #     return result.scalars().one_or_none()
 
     @staticmethod
     async def first_to_end_db(user, session: AsyncSession):
