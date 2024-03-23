@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot_app.database.models import user
+from bot_app.database.models import User
 from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_KBRD, CANCEL_KBRD
 
 
@@ -20,8 +20,10 @@ ADD_EMAIL = 'Введите почту'
 EMAIL_DOMAIN = '@groupeseb'
 COMPLITE_MSG = 'Регистрация прошла успешно'
 INVALID_EMAIL = 'Вы ввели не корпоративную почту'
+
 NAME_RULES = 'Имя должно содержать только буквы. Пожалуйста, введите имя снова'
 LAST_NAME_RULES = 'Фамилия должна быть только из букв. Введите её заново.'
+
 
 
 user_reg_router = Router()
@@ -46,7 +48,7 @@ async def add_name(
     session: AsyncSession
 ):
     """Начало регистрации пользователя."""
-    if await user.get(session, int(message.from_user.id)):
+    if await User.get(session, int(message.from_user.id)):
         await message.answer(
             CANT_REGISTER,
             reply_markup=MAIN_MENU_KBRD
@@ -130,7 +132,7 @@ async def refister(
     await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_KBRD)
     data = await state.get_data()
     data['tg_id'] = message.from_user.id
-    await user.create(session, data)
+    await User.create(session, data)
     await state.clear()
 
 
