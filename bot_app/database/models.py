@@ -82,6 +82,12 @@ class User(Base):
         return db_obj.scalars().one_or_none()
 
     @staticmethod
+    async def get_by_email(session: AsyncSession, email: str):
+        """Получение объекта по email."""
+        db_obj = await session.execute(select(User).where(User.email == email))
+        return db_obj.scalars().one_or_none()
+
+    @staticmethod
     async def get_all(session: AsyncSession):
         """Получение всех объектов."""
         users = await session.execute(select(User))

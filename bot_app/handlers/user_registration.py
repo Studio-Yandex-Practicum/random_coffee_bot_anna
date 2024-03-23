@@ -3,26 +3,27 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
-# from database.crud import get_user_by_id
 
 from bot_app.database.models import User
-from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_KBRD
+from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_KBRD, CANCEL_KBRD
 
 
 REGISTER = 'Регистрация'
 CANT_REGISTER = 'Вы уже зарегистрированы'
 ADD_NAME = 'Введите своё имя'
-CANCEL = 'Отмена'
+CANCEL = 'отмена'
 CANCSEL_MSG = 'Действия отменены'
-BACK = 'Назад'
+BACK = 'назад'
 NO_STEP = 'Предыдущего шага нет, введите имя напишите "отмена"'
 ADD_LAST_NAME = 'Введите фамилию'
 ADD_EMAIL = 'Введите почту'
 EMAIL_DOMAIN = '@groupeseb'
 COMPLITE_MSG = 'Регистрация прошла успешно'
 INVALID_EMAIL = 'Вы ввели не корпоративную почту'
-NAME_RULES = "Имя должно содержать только буквы. Пожалуйста, введите имя снова."
-LAST_NAME_RULES = "Фамилия должна содержать только буквы. Пожалуйста, введите фамилию снова."
+
+NAME_RULES = 'Имя должно содержать только буквы. Пожалуйста, введите имя снова'
+LAST_NAME_RULES = 'Фамилия должна быть только из букв. Введите её заново.'
+
 
 
 user_reg_router = Router()
@@ -57,7 +58,7 @@ async def add_name(
     else:
         await message.answer(
             ADD_NAME,
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=CANCEL_KBRD
         )
         await state.set_state(AddUser.name)
 

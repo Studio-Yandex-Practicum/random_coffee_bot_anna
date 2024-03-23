@@ -3,7 +3,13 @@ from aiogram.filters import CommandStart
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot_app.database.models import User
-from bot_app.keyboards.reply import REGISTER_KBRD, NEXT_KBRD, MORE_KBRD, MAIN_MENU_KBRD
+from bot_app.keyboards.reply import (
+    REGISTER_KBRD,
+    NEXT_KBRD,
+    MORE_KBRD,
+    MAIN_MENU_KBRD
+)
+
 from bot_app.handlers.constants import constants
 
 
