@@ -20,6 +20,7 @@ ADD_EMAIL = 'Введите почту'
 EMAIL_DOMAIN = '@groupeseb'
 COMPLITE_MSG = 'Регистрация прошла успешно'
 INVALID_EMAIL = 'Вы ввели не корпоративную почту'
+EMAIL_EXIST = 'Пользователь с такой почтой уже существует. Введите другую почту'
 
 NAME_RULES = 'Имя должно содержать только буквы. Пожалуйста, введите имя снова'
 LAST_NAME_RULES = 'Фамилия должна быть только из букв. Введите её заново.'
@@ -127,12 +128,16 @@ async def refister(
     session: AsyncSession
 ):
     """Окончание регистрации."""
-    await state.update_data(email=message.text)
-    await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
-    data = await state.get_data()
-    data['tg_id'] = message.from_user.id
-    await User.create(session, data)
-    await state.clear()
+    tg_user = await User.get_by_email(session, message.text)
+    if tg_user:
+        await message.answer(EMAIL_EXIST)
+    else:
+        await state.update_data(email=message.text)
+        await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
+        data = await state.get_data()
+        data['tg_id'] = message.from_user.id
+        await User.create(session, data)
+        await state.clear()
 
 
 @user_reg_router.message(AddUser.email)
