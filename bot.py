@@ -43,12 +43,16 @@ async def main() -> None:
     #                   next_run_time=datetime.now())
     # scheduler.add_job(distribution, args=(sql_session,),
     #                   trigger='cron', day_of_week='thu', hour=19, minute=58)
+    scheduler.add_job(distribution, args=(sql_session,),
+                      trigger='cron', day_of_week='0-6', hour=10, minute=00)
 
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПТН НУЖНО РАЗКОММЕНТИРОВАТЬ СТРОКИ 48-49, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
     # scheduler.add_job(meeting_reminder_mailing, args=(
     #     sql_session,), next_run_time=datetime.now())
     # scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
     #                   day_of_week='thu', hour=19, minute=36)
+    scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
+                      day_of_week='0-6', hour=12, minute=00)
     scheduler.start()
 
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
