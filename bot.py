@@ -12,9 +12,10 @@ from bot_app.handlers.admin import admin_router
 from bot_app.handlers.base_commands import base_commands_router
 from bot_app.handlers.user_registration import user_reg_router
 from bot_app.handlers.callbacks_handler import callback_router
+from bot_app.mailing.mailing import meeting_mailing
 from bot_app.middleware.dp import DataBaseSession
-from bot_app.mailing.mailing import meeting_reminder_mailing
-from bot_app.mailing.distribution import distribution
+# from bot_app.mailing.mailing import meeting_reminder_mailing
+# from bot_app.mailing.distribution import distribution
 
 
 async def on_startup():
@@ -46,8 +47,8 @@ async def main() -> None:
 
     sql_session = await anext(get_async_session())
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПН НУЖНО РАЗКОММЕНТИРОВАТЬ СТРОКИ 42-43, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
-    # scheduler.add_job(distribution, args=(sql_session,),
-    #                   next_run_time=datetime.now())
+    scheduler.add_job(meeting_mailing, args=(sql_session,),
+                      next_run_time=datetime.now())
     # scheduler.add_job(distribution, args=(sql_session,),
     #                   trigger='cron', day_of_week='thu', hour=19, minute=58)
 

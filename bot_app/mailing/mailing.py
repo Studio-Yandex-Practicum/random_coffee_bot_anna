@@ -6,6 +6,7 @@ from aiogram.types.inline_keyboard_button import InlineKeyboardButton
 
 from bot_app.core.config import bot
 from bot_app.database.models import User
+from bot_app.mailing.distribution import distribution
 
 MEETING_MESSAGE = '''
 Ваша пара для Кофе вслепую {} {} ({}).
@@ -16,6 +17,14 @@ MEET_OK = 'Да'
 MEET_FALSE = 'Нет'
 MEET_END_OF_WEEK = 'Встретимся в конце недели'
 REMINDER_MAILING = 'Удалось ли уже встретиться с коллегой и выпить чашечку кофе?'
+TEXT_FOR_EXTRA = """
+Привет!На этой неделе в нашем проекте «Кофе вслепую» нечетное количество
+участников, поэтому имя коллеги тебе придет на следующей неделе.
+Но сейчас не теряй возможность, пригласи на чашечку кофе любого
+коллегу и предложи ему присоединиться к нашему проекту
+(конечно, если он еще не участвует)!
+Отличного дня и продуктивной недели😊
+"""
 
 meet_inline_buttons = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -34,7 +43,12 @@ async def mailing_by_user_tg_id(chat_id: str,
                            reply_markup=inline_buttons)
 
 
-async def meeting_mailing(meetings_pairs: List[Tuple[User, User]] = None):
+async def meeting_mailing(session: AsyncSession): #(meetings_pairs: List[Tuple[User, User]], no_pair):
+    meetings_pairs, no_pair = await distribution(session)
+    if no_pair:
+        print(no_pair)
+        await mailing_by_user_tg_id(chat_id=no_pair.tg_id, text=TEXT_FOR_EXTRA)
+    print(meetings_pairs)
     for pair in meetings_pairs:
         await mailing_by_user_tg_id(chat_id=pair[0].tg_id,
                                     text=MEETING_MESSAGE.format(pair[1].name,

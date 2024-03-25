@@ -1,8 +1,5 @@
 from typing import List, Optional
 
-from asyncpg import DatabaseDroppedError
-from sqlalchemy.orm.session import make_transient
-from sqlalchemy import (Boolean, Integer, String, select)
 from sqlalchemy import Boolean, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
@@ -121,7 +118,8 @@ class User(Base):
 
     @staticmethod
     async def first_to_end_db(user, session: AsyncSession):
-        await User.remove(session, user)
+        """Перезапись объекта."""
+        await session.delete(user)
         user.id = None
         session.expunge(user)
         make_transient(user)
@@ -141,6 +139,7 @@ class User(Base):
             for sent in users:
                 sent.is_sent = False
             await session.commit()
+
     @staticmethod
     async def first_active(session: AsyncSession):
         """Получение первого объекта со статусом активный из БД."""
@@ -148,21 +147,3 @@ class User(Base):
             select(User).where(User.is_active == 1).limit(1)
         )
         return result.scalars().one_or_none()
-
-    # @staticmethod
-    # async def rewrite(session: AsyncSession, obj):
-    #     await user.remove(session, obj)
-    #     obj.id = None
-    #     session.expunge(obj)
-    #     make_transient(obj)
-    #     session.add(obj)
-    #     await session.commit()
-
-    @staticmethod
-    async def rewrite(session: AsyncSession, obj):
-        await session.delete(obj)
-        obj.id = None
-        session.expunge(obj)
-        make_transient(obj)
-        session.add(obj)
-        await session.commit()
