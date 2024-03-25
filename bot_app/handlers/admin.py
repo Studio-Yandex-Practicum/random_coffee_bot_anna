@@ -17,14 +17,13 @@ ADD_ID = 'Введите id'
 ALL_USERS = 'Список всех пользователей'
 DELETE_USER = 'Удалить пользователя'
 DEACTIVATE_USER = 'Деактивировать пользователя'
-DEACTIVATE_COMPLITE = 'Пользователь дективирован'
+DEACTIVATE_COMPLITE = 'Пользователь деактивирован'
 MAIN_MENU = 'Главное меню'
 RETURN_TO_MENU = 'Вы вернулись в главное меню'
 ADD_USER_TO_ADMIN = 'Добавить пользователя в админы'
 ADD_EMAIL = 'Введите почту пользователя'
 SUCCESS = 'Пользователь стал администратором'
 ANTI_SUCCESS = 'Пользователь перестал быть администратором'
-NON_USER = 'Такого пользователя не существует'
 ADMIN_ALREADY = 'Этот пользователь уже администратор'
 REMOVE_USER_FROM_ADMIN = 'Удалить пользователя из админов'
 NON_USER_ADMIN = 'Этот пользователь не является админом'
@@ -151,7 +150,8 @@ async def add_to_admin(
     state: FSMContext,
     session: AsyncSession
 ):
-    result = await session.execute(select(User).filter(User.email == message.text))
+    result = await session.execute(
+        select(User).filter(User.email == message.text))
     user = result.scalars().one_or_none()
     if user:
         if user.is_admin:
@@ -162,22 +162,28 @@ async def add_to_admin(
             await message.answer(SUCCESS)
             await state.clear()
     else:
-        await message.answer(NON_USER)
+        await message.answer(NOT_FOUND)
+        await state.clear()
 
 
 @admin_router.message(AddUserToAdmin.rem_email)
 async def remove_from_admin(
     message: types.Message,
+    state: FSMContext,
     session: AsyncSession
 ):
-    result = await session.execute(select(User).filter(User.email == message.text))
+    result = await session.execute(
+        select(User).filter(User.email == message.text))
     user = result.scalars().one_or_none()
     if user:
         if user.is_admin:
             user.is_admin = False
             await session.commit()
             await message.answer(ANTI_SUCCESS)
+            await state.clear()
         else:
             await message.answer(NON_USER_ADMIN)
+            await state.clear()
     else:
-        await message.answer(NON_USER)
+        await message.answer(NOT_FOUND)
+        await state.clear()

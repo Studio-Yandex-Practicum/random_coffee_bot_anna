@@ -25,7 +25,7 @@ async def distribution(session):
         if len(actives) % 2:
             i = len(actives) // 2
             extra = actives[i]
-            del extra
+            del actives[i]
             await mailing_by_user_tg_id(chat_id=extra.tg_id, text=TEXT_FOR_EXTRA)
             await User.first_to_end_db(extra, session)
 
