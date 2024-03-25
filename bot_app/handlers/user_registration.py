@@ -133,11 +133,11 @@ async def refister(
         await message.answer(EMAIL_EXIST)
     else:
         await state.update_data(email=message.text)
-        await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
         data = await state.get_data()
         data['tg_id'] = message.from_user.id
         await User.create(session, data)
         await state.clear()
+        await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
 
 
 @user_reg_router.message(AddUser.email)
