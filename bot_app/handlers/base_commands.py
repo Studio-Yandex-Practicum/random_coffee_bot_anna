@@ -32,7 +32,7 @@ base_commands_router = Router()
 @base_commands_router.message(CommandStart())
 async def start(message: types.Message, session: AsyncSession):
     """Команда /start."""
-    tg_user = await user.get(session, message.from_user.id)
+    tg_user = await User.get(session, message.from_user.id)
     if tg_user:
         await message.answer(constants['START_MSG'], reply_markup=MAIN_MENU_ACTIVE_KBRD)
         return
@@ -75,7 +75,7 @@ async def about_one(message: types.Message):
 @base_commands_router.message(F.text == MAIN_MENU)
 async def menu(message: types.Message, session: AsyncSession):
     """Вернуться в главное меню."""
-    tg_user = await user.get(session, message.from_user.id)
+    tg_user = await User.get(session, message.from_user.id)
     if tg_user.is_active:
         await message.answer(
             RETURN_TO_MENU,
@@ -91,8 +91,8 @@ async def menu(message: types.Message, session: AsyncSession):
 @base_commands_router.message(F.text == STOP_PARTICIPATE)
 async def stop(message: types.Message, session: AsyncSession):
     """Остановить участие."""
-    tg_user = await user.get(session, int(message.from_user.id))
-    if await user.activate_deactivate_user(session, tg_user.email):
+    tg_user = await User.get(session, int(message.from_user.id))
+    if await User.activate_deactivate_user(session, tg_user.email):
         await message.answer(
             constants['stop_participate_msg'],
             reply_markup=MAIN_MENU_DEACTIVE_KBRD
@@ -104,8 +104,8 @@ async def stop(message: types.Message, session: AsyncSession):
 @base_commands_router.message(F.text == RESTART_PARTICIPATE)
 async def up(message: types.Message, session: AsyncSession):
     """Возобновить участие."""
-    tg_user = await user.get(session, int(message.from_user.id))
-    if await user.activate_deactivate_user(session, tg_user.email):
+    tg_user = await User.get(session, int(message.from_user.id))
+    if await User.activate_deactivate_user(session, tg_user.email):
         await message.answer(
             RESTART_PARTICIPATE_MSG,
             reply_markup=MAIN_MENU_ACTIVE_KBRD
