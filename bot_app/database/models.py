@@ -1,9 +1,11 @@
 from typing import List, Optional
 
-from sqlalchemy import Boolean, Integer, String, select
+from asyncpg import DatabaseDroppedError
+from sqlalchemy.orm.session import make_transient
+from sqlalchemy import (Boolean, Integer, String, select)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
-                            make_transient, mapped_column)
+                            mapped_column)
 
 
 USER = ('{name} '
@@ -35,7 +37,7 @@ class User(Base):
         String(150), nullable=False
     )
     email: Mapped[str] = mapped_column(
-        String(150), nullable=False, unique=True
+        String(150), nullable=False
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True
@@ -118,8 +120,7 @@ class User(Base):
 
     @staticmethod
     async def first_to_end_db(user, session: AsyncSession):
-        """Перезапись объекта."""
-        await session.delete(user)
+        await User.remove(session, user)
         user.id = None
         session.expunge(user)
         make_transient(user)
@@ -139,11 +140,3 @@ class User(Base):
             for sent in users:
                 sent.is_sent = False
             await session.commit()
-
-    @staticmethod
-    async def first_active(session: AsyncSession):
-        """Получение первого объекта со статусом активный из БД."""
-        result = await session.execute(
-            select(User).where(User.is_active == 1).limit(1)
-        )
-        return result.scalars().one_or_none()
