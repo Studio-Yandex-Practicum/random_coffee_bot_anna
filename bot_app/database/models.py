@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from asyncpg import DatabaseDroppedError
+# from asyncpg import DatabaseDroppedError
 from sqlalchemy.orm.session import make_transient
 from sqlalchemy import (Boolean, Integer, String, select)
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +16,7 @@ USER = ('{name} '
 
 
 class Base(DeclarativeBase):
+    """Base model."""
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, nullable=False
     )
@@ -26,7 +27,7 @@ class Base(DeclarativeBase):
 
 
 class User(Base):
-
+    """User model."""
     tg_id: Mapped[int] = mapped_column(
         Integer, nullable=False, unique=True
     )
@@ -64,38 +65,38 @@ class User(Base):
 
     @staticmethod
     async def create(session: AsyncSession, data: dict):
-        """Создать объект."""
+        """Create an object."""
         session.add(User(**data))
         await session.commit()
 
     @staticmethod
     async def remove(session: AsyncSession, db_obj):
-        """Удалить объект."""
+        """Delete object."""
         await session.delete(db_obj)
         await session.commit()
         return db_obj
 
     @staticmethod
     async def get(session: AsyncSession, tg_id: int):
-        """Получение объекта по tg_id"""
+        """Getting an object by tg_id."""
         db_obj = await session.execute(select(User).where(User.tg_id == tg_id))
         return db_obj.scalars().one_or_none()
 
     @staticmethod
     async def get_by_email(session: AsyncSession, email: str):
-        """Получение объекта по email."""
+        """Receiving an object by email."""
         db_obj = await session.execute(select(User).where(User.email == email))
         return db_obj.scalars().one_or_none()
 
     @staticmethod
     async def get_all(session: AsyncSession):
-        """Получение всех объектов."""
+        """Retrieving all objects."""
         users = await session.execute(select(User))
         return users.scalars().all()
 
     @staticmethod
     async def activate_deactivate_user(session: AsyncSession, email: str):
-        """Активировать/деактивировать объект."""
+        """Activate/deactivate an object."""
         result = await session.execute(
             select(User).filter(User.email == email)
         )
@@ -108,13 +109,15 @@ class User(Base):
 
     @staticmethod
     async def get_all_activated(session: AsyncSession):
-        """Получение всех активных объектов."""
-        result = await session.execute(select(User).filter(User.is_active == 1))
+        """Retrieving all active objects."""
+        result = await session.execute(
+            select(User).filter(User.is_active == 1)
+        )
         return result.scalars().all()
 
     @staticmethod
     async def get_all_is_sent(session: AsyncSession):
-        """Получение всех обеъектов, кому сделана рассылка."""
+        """Receiving all objects to whom the mailing was sent."""
         result = await session.execute(select(User).filter(User.is_sent == 1))
         return result.scalars().all()
 
@@ -135,7 +138,10 @@ class User(Base):
             await session.commit()
 
     @staticmethod
-    async def set_is_sent_status_false(users: Optional[List], session: AsyncSession):
+    async def set_is_sent_status_false(
+        users: Optional[List],
+        session: AsyncSession
+    ):
         if users is not None:
             for sent in users:
                 sent.is_sent = False

@@ -4,7 +4,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_ACTIVE_KBRD, CANCEL_KBRD
+from bot_app.keyboards.reply import (
+    REGISTER_KBRD,
+    MAIN_MENU_ACTIVE_KBRD,
+    CANCEL_KBRD,
+)
 from bot_app.database.models import User
 
 
@@ -47,7 +51,7 @@ async def add_name(
     state: FSMContext,
     session: AsyncSession
 ):
-    """Начало регистрации пользователя."""
+    """Start of user registration."""
     if await User.get(session, int(message.from_user.id)):
         await message.answer(
             CANT_REGISTER,
@@ -66,7 +70,7 @@ async def add_name(
 @user_reg_router.message(StateFilter('*'), Command(CANCEL))
 @user_reg_router.message(StateFilter('*'), F.text.casefold() == CANCEL)
 async def cancel_handler(message: types.Message, state: FSMContext) -> None:
-    """Отмена всех действий регистрации."""
+    """Cancels all registration actions."""
     current_state = await state.get_state()
     if current_state is None:
         return
@@ -78,7 +82,7 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
 @user_reg_router.message(StateFilter('*'), Command(BACK))
 @user_reg_router.message(StateFilter('*'), F.text.casefold() == BACK)
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
-    """Шаг назад для регистрации."""
+    """Step back to register."""
     current_state = await state.get_state()
     if current_state == AddUser.name:
         await message.answer(NO_STEP)
@@ -97,7 +101,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
 
 @user_reg_router.message(AddUser.name, F.text)
 async def add_last_name(message: types.Message, state: FSMContext):
-    """Добавление фамилии."""
+    """Adding a last name."""
     name = message.text
     if check_alpha(name):
         await state.update_data(name=name)
@@ -110,7 +114,7 @@ async def add_last_name(message: types.Message, state: FSMContext):
 
 @user_reg_router.message(AddUser.last_name, F.text)
 async def add_mail(message: types.Message, state: FSMContext):
-    """Добавление почты."""
+    """Adding mail."""
     last_name = message.text
     if check_alpha(last_name):
         await state.update_data(last_name=last_name)
@@ -127,7 +131,7 @@ async def refister(
     state: FSMContext,
     session: AsyncSession
 ):
-    """Окончание регистрации."""
+    """End of registration."""
     tg_user = await User.get_by_email(session, message.text)
     if tg_user:
         await message.answer(EMAIL_EXIST)
@@ -142,7 +146,7 @@ async def refister(
 
 @user_reg_router.message(AddUser.email)
 async def invalid_mail(message: types.Message, state: FSMContext):
-    """Сообщение о неккоректной почте."""
+    """Report about incorrect mail."""
     await message.answer(INVALID_EMAIL)
 
 

@@ -1,4 +1,4 @@
-"""Настройки проекта."""
+"""Project settings."""
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from aiogram import Bot
 from aiogram.enums import ParseMode

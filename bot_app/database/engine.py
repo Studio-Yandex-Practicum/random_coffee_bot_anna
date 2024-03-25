@@ -1,4 +1,4 @@
-"""Настройки работы с базой данных"""
+"""Database settings."""
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from bot_app.core.config import settings
@@ -9,6 +9,6 @@ session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def get_async_session():
-    """Асинхронный генератор сессий."""
+    """Asynchronous session generator."""
     async with session_maker() as session:
         yield session

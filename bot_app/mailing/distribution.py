@@ -26,7 +26,9 @@ async def distribution(session):
             i = len(actives) // 2
             extra = actives[i]
             del actives[i]
-            await mailing_by_user_tg_id(chat_id=extra.tg_id, text=TEXT_FOR_EXTRA)
+            await mailing_by_user_tg_id(
+                chat_id=extra.tg_id, text=TEXT_FOR_EXTRA
+            )
             await User.first_to_end_db(extra, session)
 
         await User.set_is_sent_status_true(actives, session)

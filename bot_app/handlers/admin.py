@@ -1,4 +1,4 @@
-"""Администрирование телеграмм бота"""
+"""Telegram bot administration."""
 from aiogram import F, Router, types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
@@ -52,13 +52,13 @@ class AddUserToAdmin(StatesGroup):
 
 @admin_router.message(StateFilter(None), Command('admin'))
 async def get_admin_commands(message: types.Message, session: AsyncSession):
-    """Команда для администрирования пользователей."""
+    """User administration team."""
     await message.answer(ADMIN_ONLY, reply_markup=ADMIN_KBRD)
 
 
 @admin_router.message(F.text == ALL_USERS)
 async def get_user_list(message: types.Message, session: AsyncSession):
-    """Получить список всех пользователей."""
+    """Get a list of all users."""
     user_list_str = '\n'.join(
         repr(user) for user in await User.get_all(session)
     )
@@ -70,7 +70,7 @@ async def get_user_list(message: types.Message, session: AsyncSession):
 
 @admin_router.message(StateFilter(None), F.text == DELETE_USER)
 async def delete_user(message: types.Message, state: FSMContext):
-    """Удалить пользователя. Ожидание email пользователя"""
+    """Delete user. Waiting for user email."""
     await message.answer(
         ADD_EMAIL,
         reply_markup=types.ReplyKeyboardRemove()
@@ -84,7 +84,7 @@ async def delete_user_id(
     state: FSMContext,
     session: AsyncSession
 ):
-    """Удаление пользователя по email."""
+    """Removing a user by email."""
     await state.update_data(email=message.text)
     tg_user = await User.get_by_email(session, message.text)
     if tg_user:
@@ -101,7 +101,7 @@ async def delete_user_id(
         F.text == DEACTIVATE_USER
 )
 async def deactive_user(message: types.Message, state: FSMContext):
-    """Деактивировать пользователя. Ожидание email пользователя."""
+    """Deactivate a user. Waiting for user email."""
     await message.answer(ADD_EMAIL, reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(DeactiveUser.email)
 
@@ -112,7 +112,7 @@ async def deactivate_user_id(
     state: FSMContext,
     session: AsyncSession
 ):
-    """Деактивация пользователя по email."""
+    """Deactivating a user by email."""
     await state.update_data(email=message.text)
     deactive = await User.activate_deactivate_user(session, message.text)
     if deactive:
@@ -129,7 +129,7 @@ async def deactivate_user_id(
 @admin_router.message(F.text == ADD_USER_TO_ADMIN)
 async def add_user_to_admin(message: types.Message, state: FSMContext,
                             session: AsyncSession):
-    """Добавить пользователя в админы."""
+    """Add a user to admins."""
     await state.update_data(email=message.text)
     await message.answer(ADD_EMAIL)
     await state.set_state(AddUserToAdmin.email)
@@ -138,7 +138,7 @@ async def add_user_to_admin(message: types.Message, state: FSMContext,
 @admin_router.message(F.text == REMOVE_USER_FROM_ADMIN)
 async def remove_user_from_admin(message: types.Message, state: FSMContext,
                                  session: AsyncSession):
-    """Удалить пользователя из админов."""
+    """Remove user from admins."""
     await state.update_data(email=message.text)
     await message.answer(ADD_EMAIL)
     await state.set_state(AddUserToAdmin.rem_email)
