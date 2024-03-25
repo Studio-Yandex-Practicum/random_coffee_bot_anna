@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from bot_app.database.models import User
-from bot_app.database.models import user
 from bot_app.filters.is_admin import IsAdmin
 from bot_app.keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
 
@@ -62,7 +61,7 @@ async def get_admin_commands(message: types.Message, session: AsyncSession):
 async def get_user_list(message: types.Message, session: AsyncSession):
     """Получить список всех пользователей."""
     user_list_str = '\n'.join(
-        repr(user) for user in await user.get_all(session)
+        repr(user) for user in await User.get_all(session)
     )
     if user_list_str:
         await message.answer(user_list_str)
@@ -88,7 +87,7 @@ async def delete_user_id(
 ):
     """Удаление пользователя по email."""
     await state.update_data(email=message.text)
-    if await user.remove(session, await user.get_by_email(session, message.text)):
+    if await User.remove(session, await User.get_by_email(session, message.text)):
         await message.answer(DELETE_COMPLITE, reply_markup=ADMIN_KBRD)
         await state.clear()
     message.answer(NOT_FOUND, reply_markup=ADMIN_KBRD)
@@ -112,7 +111,7 @@ async def deactivate_user_id(
 ):
     """Деактивация пользователя по email."""
     await state.update_data(email=message.text)
-    deactive = await user.activate_deactivate_user(session, message.text)
+    deactive = await User.activate_deactivate_user(session, message.text)
     if deactive:
         await message.answer(
             DEACTIVATE_COMPLITE,
@@ -176,7 +175,7 @@ async def remove_from_admin(
     result = await session.execute(select(User).filter(User.email == message.text))
     user = result.scalars().one_or_none()
     if user:
-        if user.is_admin == True:
+        if user.is_admin:
             user.is_admin = False
             await session.commit()
             await message.answer(ANTI_SUCCESS)

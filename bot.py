@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import asyncio
 import pytz
 from aiogram import Dispatcher, types
@@ -10,7 +12,10 @@ from bot_app.handlers.base_commands import base_commands_router
 from bot_app.handlers.user_registration import user_reg_router
 from bot_app.handlers.callbacks_handler import callback_router
 from bot_app.middleware.dp import DataBaseSession
-from bot_app.mailing.mailing import meeting_mailing, meeting_reminder_mailing
+from bot_app.mailing.mailing import meeting_reminder_mailing
+from bot_app.mailing.distribution import distribution
+
+from aiogram.types import BotCommand
 
 
 async def on_startup():
@@ -19,6 +24,12 @@ async def on_startup():
 
 async def on_shutdown():
     print('Бот лег')
+
+
+COMMANDS = [
+        BotCommand(command="/start", description="Перезапустить бота"),
+        BotCommand(command="/admin", description="Панель администратора"),
+    ]
 
 
 async def main() -> None:
@@ -35,11 +46,20 @@ async def main() -> None:
     scheduler = AsyncIOScheduler(timezone=timezone)
 
     sql_session = await anext(get_async_session())
-    # scheduler.add_job(meeting_mailing, args=(sql_session,), trigger='cron1, day_of_week='mon', hour=10, minute=30)
-    scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
-                      day_of_week='fri', hour=10, minute=30)
+# ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПН НУЖНО РАЗКОММЕНТИРОВАТЬ СТРОКИ 42-43, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
+    # scheduler.add_job(distribution, args=(sql_session,),
+    #                   next_run_time=datetime.now())
+    # scheduler.add_job(distribution, args=(sql_session,),
+    #                   trigger='cron', day_of_week='thu', hour=19, minute=58)
+
+# ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПТН НУЖНО РАЗКОММЕНТИРОВАТЬ СТРОКИ 48-49, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
+    # scheduler.add_job(meeting_reminder_mailing, args=(
+    #     sql_session,), next_run_time=datetime.now())
+    # scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
+    #                   day_of_week='thu', hour=19, minute=36)
     scheduler.start()
 
+    await bot.set_my_commands(COMMANDS)
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())

@@ -122,14 +122,20 @@ class User(Base):
         )
         return result.scalars().one_or_none()
 
+    # @staticmethod
+    # async def rewrite(session: AsyncSession, obj):
+    #     await user.remove(session, obj)
+    #     obj.id = None
+    #     session.expunge(obj)
+    #     make_transient(obj)
+    #     session.add(obj)
+    #     await session.commit()
+
     @staticmethod
     async def rewrite(session: AsyncSession, obj):
-        await user.remove(session, obj)
+        await session.delete(obj)
         obj.id = None
         session.expunge(obj)
         make_transient(obj)
         session.add(obj)
         await session.commit()
-
-
-user = User()
