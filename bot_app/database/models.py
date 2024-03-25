@@ -1,6 +1,10 @@
-from core.config import settings
+from bot_app.core.config import settings
 from sqlalchemy import (Boolean, CheckConstraint, ForeignKey, Integer, String,
                         UniqueConstraint, select)
+from typing import List, Optional
+
+from asyncpg import DatabaseDroppedError
+from sqlalchemy.orm.session import make_transient
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
                             mapped_column)
@@ -8,7 +12,6 @@ from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
 USER = ('{name} '
         '{last_name}\n'
         '{email}\n'
-        '{tg_id}\n'
         '{is_active}'
         '{is_admin}\n')
 
@@ -86,16 +89,22 @@ class User(Base):
         return db_obj.scalars().one_or_none()
 
     @staticmethod
+    async def get_by_email(session: AsyncSession, email: str):
+        """Получение объекта по email."""
+        db_obj = await session.execute(select(User).where(User.email == email))
+        return db_obj.scalars().one_or_none()
+
+    @staticmethod
     async def get_all(session: AsyncSession):
         """Получение всех объектов."""
         users = await session.execute(select(User))
         return users.scalars().all()
 
     @staticmethod
-    async def activate_deactivate_user(session: AsyncSession, tg_id: int):
+    async def activate_deactivate_user(session: AsyncSession, email: str):
         """Активировать/деактивировать объект."""
         result = await session.execute(
-            select(User).filter(User.tg_id == tg_id)
+            select(User).filter(User.email == email)
         )
         obj = result.scalars().one_or_none()
         if obj:
@@ -116,5 +125,25 @@ class User(Base):
         result = await session.execute(select(User).filter(User.is_sent == 1))
         return result.scalars().all()
 
+    @staticmethod
+    async def first_to_end_db(user, session: AsyncSession):
+        await User.remove(session, user)
+        user.id = None
+        session.expunge(user)
+        make_transient(user)
+        session.add(user)
+        await session.commit()
 
-user = User()
+    @staticmethod
+    async def set_is_sent_status_true(users: List, session: AsyncSession):
+        if len(users) > 0:
+            for sent in users:
+                sent.is_sent = True if not sent.is_sent else sent.is_sent
+            await session.commit()
+
+    @staticmethod
+    async def set_is_sent_status_false(users: Optional[List], session: AsyncSession):
+        if users is not None:
+            for sent in users:
+                sent.is_sent = False
+            await session.commit()

@@ -7,9 +7,9 @@ from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot_app.database.models import User, user
+from bot_app.database.models import User
 from bot_app.filters.is_admin import IsAdmin
-from bot_app.keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
+from bot_app.keyboards.reply import ADMIN_KBRD
 
 logger.add("error_logs.log", level="ERROR")
 
@@ -20,14 +20,13 @@ ADD_ID = 'Введите id'
 ALL_USERS = 'Список всех пользователей'
 DELETE_USER = 'Удалить пользователя'
 DEACTIVATE_USER = 'Деактивировать пользователя'
-DEACTIVATE_COMPLITE = 'Пользователь дективирован'
+DEACTIVATE_COMPLITE = 'Пользователь деактивирован'
 MAIN_MENU = 'Главное меню'
 RETURN_TO_MENU = 'Вы вернулись в главное меню'
 ADD_USER_TO_ADMIN = 'Добавить пользователя в админы'
 ADD_EMAIL = 'Введите почту пользователя'
 SUCCESS = 'Пользователь стал администратором'
 ANTI_SUCCESS = 'Пользователь перестал быть администратором'
-NON_USER = 'Такого пользователя не существует'
 ADMIN_ALREADY = 'Этот пользователь уже администратор'
 REMOVE_USER_FROM_ADMIN = 'Удалить пользователя из админов'
 NON_USER_ADMIN = 'Этот пользователь не является админом'
@@ -38,11 +37,11 @@ admin_router.message.filter(IsAdmin())
 
 
 class DelUser(StatesGroup):
-    tg_id = State()
+    email = State()
 
 
 class DeactiveUser(StatesGroup):
-    tg_id = State()
+    email = State()
 
 
 class AddUserToAdmin(StatesGroup):
@@ -80,57 +79,58 @@ async def get_user_list(message: types.Message, session: AsyncSession):
 
 @admin_router.message(StateFilter(None), F.text == DELETE_USER)
 async def delete_user(message: types.Message, state: FSMContext):
-    """Удалить пользователя. Ожидание id пользователя"""
+    """Удалить пользователя. Ожидание email пользователя"""
     try:
         await message.answer(
             ADD_ID,
             reply_markup=types.ReplyKeyboardRemove()
         )
-        await state.set_state(DelUser.tg_id)
+        await state.set_state(DelUser.email)
     except Exception as e:
         logger.error(f"Error in delete_user function: {e}")
 
 
-@admin_router.message(DelUser.tg_id, F.text)
+@admin_router.message(DelUser.email, F.text)
 async def delete_user_id(
     message: types.Message,
     state: FSMContext,
     session: AsyncSession
 ):
-    """Удаление пользователя по tg_id."""
+    """Удаление пользователя по email."""
     try:
-        await state.update_data(tg_id=message.text)
-        if await user.remove(session, await user.get(session, int(message.text))):
+        await state.update_data(email=message.text)
+        if await user.remove(session, await user.get(session, message.text)):
             await message.answer(DELETE_COMPLITE, reply_markup=ADMIN_KBRD)
             await state.clear()
         message.answer(NOT_FOUND, reply_markup=ADMIN_KBRD)
+        await state.clear()
     except Exception as e:
         logger.error(f"Error in delete_user_id function: {e}")
 
-
+        
 @admin_router.message(
         StateFilter(None),
         F.text == DEACTIVATE_USER
 )
 async def deactive_user(message: types.Message, state: FSMContext):
-    """Деактивировать пользователя. Ожидание id пользователя"""
+    """Деактивировать пользователя. Ожидание email пользователя."""
     try:
-        await message.answer(ADD_ID, reply_markup=types.ReplyKeyboardRemove())
-        await state.set_state(DeactiveUser.tg_id)
+        await message.answer(ADD_EMAIL, reply_markup=types.ReplyKeyboardRemove())
+        await state.set_state(DeactiveUser.email)
     except Exception as e:
         logger.error(f"Error in deactive_user function: {e}")
 
-
-@admin_router.message(DeactiveUser.tg_id, F.text)
+        
+@admin_router.message(DeactiveUser.email, F.text)
 async def deactivate_user_id(
     message: types.Message,
     state: FSMContext,
     session: AsyncSession
 ):
-    """Деактивация пользователя по id."""
+    """Деактивация пользователя по email."""
     try:
-        await state.update_data(tg_id=message.text)
-        deactive = await user.activate_deactivate_user(session, int(message.text))
+        await state.update_data(email=message.text)
+        deactive = await User.activate_deactivate_user(session, message.text)
         if deactive:
             await message.answer(
                 DEACTIVATE_COMPLITE,
@@ -144,18 +144,9 @@ async def deactivate_user_id(
         logger.error(f"Error in deactivate_user_id function: {e}")
 
 
-@admin_router.message(F.text == MAIN_MENU)
-async def menu(message: types.Message):
-    """Вернуться в главное меню."""
-    try:
-        await message.answer(RETURN_TO_MENU, reply_markup=MAIN_MENU_KBRD)
-    except Exception as e:
-        logger.error(f"Error in menu function: {e}")
-
-
 @admin_router.message(F.text == ADD_USER_TO_ADMIN)
 async def add_user_to_admin(message: types.Message, state: FSMContext,
-    session: AsyncSession):
+                            session: AsyncSession):
     """Добавить пользователя в админы."""
     try:
         await state.update_data(email=message.text)
@@ -167,7 +158,7 @@ async def add_user_to_admin(message: types.Message, state: FSMContext,
 
 @admin_router.message(F.text == REMOVE_USER_FROM_ADMIN)
 async def remove_user_from_admin(message: types.Message, state: FSMContext,
-    session: AsyncSession):
+                                 session: AsyncSession):
     """Удалить пользователя из админов."""
     try:
         await state.update_data(email=message.text)
@@ -203,6 +194,7 @@ async def add_to_admin(
 @admin_router.message(AddUserToAdmin.rem_email)
 async def remove_from_admin(
     message: types.Message,
+    state: FSMContext,
     session: AsyncSession
 ):
     try:
@@ -213,9 +205,13 @@ async def remove_from_admin(
                 user.is_admin = False
                 await session.commit()
                 await message.answer(ANTI_SUCCESS)
+                await state.clear()
             else:
                 await message.answer(NON_USER_ADMIN)
+                await state.clear()
         else:
             await message.answer(NON_USER)
+            await state.clear()
     except Exception as e:
         logger.error(f"Error in remove_from_admin function: {e}")
+

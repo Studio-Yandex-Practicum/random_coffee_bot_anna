@@ -5,11 +5,10 @@ from aiogram.fsm.state import State, StatesGroup
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot_app.database.models import user
-from bot_app.keyboards.reply import CANCEL_KBRD, MAIN_MENU_KBRD, REGISTER_KBRD
+from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_ACTIVE_KBRD, CANCEL_KBRD
+from bot_app.database.models import User
 
 logger.add("error_logs.log", level="ERROR")
-
 
 REGISTER = 'Регистрация'
 CANT_REGISTER = 'Вы уже зарегистрированы'
@@ -23,6 +22,8 @@ ADD_EMAIL = 'Введите почту'
 EMAIL_DOMAIN = '@groupeseb'
 COMPLITE_MSG = 'Регистрация прошла успешно'
 INVALID_EMAIL = 'Вы ввели не корпоративную почту'
+EMAIL_EXIST = 'Пользователь с такой почтой уже существует. Введите другую почту'
+
 NAME_RULES = 'Имя должно содержать только буквы. Пожалуйста, введите имя снова'
 LAST_NAME_RULES = 'Фамилия должна быть только из букв. Введите её заново.'
 
@@ -50,10 +51,10 @@ async def add_name(
 ):
     """Начало регистрации пользователя."""
     try:
-        if await user.get(session, int(message.from_user.id)):
+        if await User.get(session, int(message.from_user.id)):
             await message.answer(
                 CANT_REGISTER,
-                reply_markup=MAIN_MENU_KBRD
+                reply_markup=MAIN_MENU_ACTIVE_KBRD
             )
             await state.clear()
             return
@@ -145,12 +146,16 @@ async def refister(
 ):
     """Окончание регистрации."""
     try:
-        await state.update_data(email=message.text)
-        await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_KBRD)
-        data = await state.get_data()
-        data['tg_id'] = message.from_user.id
-        await user.create(session, data)
-        await state.clear()
+        tg_user = await User.get_by_email(session, message.text)
+        if tg_user:
+            await message.answer(EMAIL_EXIST)
+        else:
+            await state.update_data(email=message.text)
+            data = await state.get_data()
+            data['tg_id'] = message.from_user.id
+            await User.create(session, data)
+            await state.clear()
+            await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
     except Exception as e:
         logger.error(f"Error in refister function: {e}")
 

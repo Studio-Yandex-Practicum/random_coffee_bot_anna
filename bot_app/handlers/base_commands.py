@@ -3,7 +3,14 @@ from aiogram.filters import CommandStart
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot_app.database.models import user
+from bot_app.database.models import User
+from bot_app.keyboards.reply import (
+    REGISTER_KBRD,
+    NEXT_KBRD,
+    MORE_KBRD,
+    MAIN_MENU_ACTIVE_KBRD,
+    MAIN_MENU_DEACTIVE_KBRD
+)
 from bot_app.handlers.constants import constants
 from bot_app.keyboards.reply import (MAIN_MENU_KBRD, MORE_KBRD, NEXT_KBRD,
                                      REGISTER_KBRD)
@@ -27,9 +34,13 @@ base_commands_router = Router()
 
 
 @base_commands_router.message(CommandStart())
-async def start(message: types.Message):
+async def start(message: types.Message, session: AsyncSession):
     """Команда /start."""
     try:
+        tg_user = await User.get(session, message.from_user.id)
+        if tg_user:
+            await message.answer(constants['START_MSG'], reply_markup=REGISTER_KBRD)
+            return
         await message.answer(constants['START_MSG'], reply_markup=REGISTER_KBRD)
     except Exception as e:
         logger.error(f"Error in start function: {e}")
@@ -81,10 +92,19 @@ async def about_one(message: types.Message):
 
 
 @base_commands_router.message(F.text == MAIN_MENU)
-async def menu(message: types.Message):
+async def menu(message: types.Message, session: AsyncSession):
     """Вернуться в главное меню."""
     try:
-        await message.answer(RETURN_TO_MENU, reply_markup=MAIN_MENU_KBRD)
+        if tg_user.is_active:
+            await message.answer(
+                RETURN_TO_MENU,
+                reply_markup=MAIN_MENU_ACTIVE_KBRD
+            )
+        else:
+            await message.answer(
+                RETURN_TO_MENU,
+                reply_markup=MAIN_MENU_DEACTIVE_KBRD
+            )
     except Exception as e:
         logger.error(f"Error in menu function: {e}")
 
@@ -93,8 +113,12 @@ async def menu(message: types.Message):
 async def stop(message: types.Message, session: AsyncSession):
     """Остановить участие."""
     try:
-        if await user.activate_deactivate_user(session, int(message.from_user.id)):
-            await message.answer(constants['stop_participate_msg'])
+        tg_user = await User.get(session, int(message.from_user.id))
+        if await User.activate_deactivate_user(session, tg_user.email):
+            await message.answer(
+                constants['stop_participate_msg'],
+                reply_markup=MAIN_MENU_DEACTIVE_KBRD
+            )
         else:
             await message.answer(CANT_STOP)
     except Exception as e:
@@ -105,8 +129,12 @@ async def stop(message: types.Message, session: AsyncSession):
 async def up(message: types.Message, session: AsyncSession):
     """Возобновить участие."""
     try:
-        if await user.activate_deactivate_user(session, int(message.from_user.id)):
-            await message.answer(RESTART_PARTICIPATE_MSG)
+        tg_user = await User.get(session, int(message.from_user.id))
+        if await User.activate_deactivate_user(session, tg_user.email):
+            await message.answer(
+                RESTART_PARTICIPATE_MSG,
+                reply_markup=MAIN_MENU_ACTIVE_KBRD
+        )
         else:
             await message.answer(CANT_RESTART_PARTICIPATE)
     except Exception as e:
