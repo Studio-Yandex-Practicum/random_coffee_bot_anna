@@ -4,8 +4,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_ACTIVE_KBRD, CANCEL_KBRD
 from bot_app.database.models import User
-from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_KBRD, CANCEL_KBRD
 
 
 REGISTER = 'Регистрация'
@@ -51,7 +51,7 @@ async def add_name(
     if await User.get(session, int(message.from_user.id)):
         await message.answer(
             CANT_REGISTER,
-            reply_markup=MAIN_MENU_KBRD
+            reply_markup=MAIN_MENU_ACTIVE_KBRD
         )
         await state.clear()
         return
@@ -129,7 +129,7 @@ async def refister(
 ):
     """Окончание регистрации."""
     await state.update_data(email=message.text)
-    await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_KBRD)
+    await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
     data = await state.get_data()
     data['tg_id'] = message.from_user.id
     await User.create(session, data)
