@@ -35,12 +35,18 @@ def get_keyboard(
             resize_keyboard=True, input_field_placeholder=placeholder)
 
 
-MAIN_MENU_KBRD = get_keyboard(
+MAIN_MENU_ACTIVE_KBRD = get_keyboard(
     'О проекте',
     'Наши коллеги про проект «Кофе вслепую»',
     'Приостановить участие',
+    sizes=[1, 1, 1]
+)
+
+MAIN_MENU_DEACTIVE_KBRD = get_keyboard(
+    'О проекте',
+    'Наши коллеги про проект «Кофе вслепую»',
     'Возобновить участие',
-    sizes=[1, 1, 2]
+    sizes=[1, 1, 1]
 )
 
 

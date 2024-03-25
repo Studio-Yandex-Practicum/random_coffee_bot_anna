@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from bot_app.database.models import User
 from bot_app.filters.is_admin import IsAdmin
-from bot_app.keyboards.reply import ADMIN_KBRD, MAIN_MENU_KBRD
+from bot_app.keyboards.reply import ADMIN_KBRD, MAIN_MENU_ACTIVE_KBRD, MAIN_MENU_DEACTIVE_KBRD
 
 ADMIN_ONLY = 'Данные действия доступны только администратору'
 DELETE_COMPLITE = 'Пользователь удалён'
@@ -123,15 +123,9 @@ async def deactivate_user_id(
         await state.clear()
 
 
-@admin_router.message(F.text == MAIN_MENU)
-async def menu(message: types.Message):
-    """Вернуться в главное меню."""
-    await message.answer(RETURN_TO_MENU, reply_markup=MAIN_MENU_KBRD)
-
-
 @admin_router.message(F.text == ADD_USER_TO_ADMIN)
 async def add_user_to_admin(message: types.Message, state: FSMContext,
-    session: AsyncSession):
+                            session: AsyncSession):
     """Добавить пользователя в админы."""
     await state.update_data(email=message.text)
     await message.answer(ADD_EMAIL)
@@ -140,7 +134,7 @@ async def add_user_to_admin(message: types.Message, state: FSMContext,
 
 @admin_router.message(F.text == REMOVE_USER_FROM_ADMIN)
 async def remove_user_from_admin(message: types.Message, state: FSMContext,
-    session: AsyncSession):
+                                 session: AsyncSession):
     """Удалить пользователя из админов."""
     await state.update_data(email=message.text)
     await message.answer(ADD_EMAIL)
@@ -156,7 +150,7 @@ async def add_to_admin(
     result = await session.execute(select(User).filter(User.email == message.text))
     user = result.scalars().one_or_none()
     if user:
-        if user.is_admin == True:
+        if user.is_admin:
             await message.answer(ADMIN_ALREADY)
         else:
             user.is_admin = True

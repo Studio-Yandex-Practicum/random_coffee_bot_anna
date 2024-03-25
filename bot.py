@@ -3,6 +3,7 @@ from datetime import datetime
 import asyncio
 import pytz
 from aiogram import Dispatcher, types
+from aiogram.types import BotCommand
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from bot_app.core.config import bot
@@ -14,8 +15,6 @@ from bot_app.handlers.callbacks_handler import callback_router
 from bot_app.middleware.dp import DataBaseSession
 from bot_app.mailing.mailing import meeting_reminder_mailing
 from bot_app.mailing.distribution import distribution
-
-from aiogram.types import BotCommand
 
 
 async def on_startup():

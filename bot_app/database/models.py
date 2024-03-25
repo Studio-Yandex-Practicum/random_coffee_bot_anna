@@ -1,3 +1,8 @@
+from typing import List, Optional
+
+from asyncpg import DatabaseDroppedError
+from sqlalchemy.orm.session import make_transient
+from sqlalchemy import (Boolean, Integer, String, select)
 from sqlalchemy import Boolean, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
@@ -114,6 +119,28 @@ class User(Base):
         result = await session.execute(select(User).filter(User.is_sent == 1))
         return result.scalars().all()
 
+    @staticmethod
+    async def first_to_end_db(user, session: AsyncSession):
+        await User.remove(session, user)
+        user.id = None
+        session.expunge(user)
+        make_transient(user)
+        session.add(user)
+        await session.commit()
+
+    @staticmethod
+    async def set_is_sent_status_true(users: List, session: AsyncSession):
+        if len(users) > 0:
+            for sent in users:
+                sent.is_sent = True if not sent.is_sent else sent.is_sent
+            await session.commit()
+
+    @staticmethod
+    async def set_is_sent_status_false(users: Optional[List], session: AsyncSession):
+        if users is not None:
+            for sent in users:
+                sent.is_sent = False
+            await session.commit()
     @staticmethod
     async def first_active(session: AsyncSession):
         """Получение первого объекта со статусом активный из БД."""
