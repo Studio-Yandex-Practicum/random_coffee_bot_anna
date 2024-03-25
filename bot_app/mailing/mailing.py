@@ -1,11 +1,14 @@
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from aiogram.types.inline_keyboard_markup import InlineKeyboardMarkup
 from aiogram.types.inline_keyboard_button import InlineKeyboardButton
+from aiogram.types.inline_keyboard_markup import InlineKeyboardMarkup
+from loguru import logger
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot_app.core.config import bot
 from bot_app.database.models import User
+
+logger.add("bot_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 MEETING_MESSAGE = '''
 Ваша пара для Кофе вслепую {} {} ({}).
@@ -26,13 +29,11 @@ meet_inline_buttons = InlineKeyboardMarkup(
                               callback_data='button_meeting')],
     ])
 
-
 async def mailing_by_user_tg_id(chat_id: str,
                                 text: str,
                                 inline_buttons: Optional[InlineKeyboardMarkup] = None):
     await bot.send_message(chat_id=chat_id, text=text,
                            reply_markup=inline_buttons)
-
 
 async def meeting_mailing(meetings_pairs: List[Tuple[User, User]] = None):
     for pair in meetings_pairs:
@@ -40,14 +41,14 @@ async def meeting_mailing(meetings_pairs: List[Tuple[User, User]] = None):
                                     text=MEETING_MESSAGE.format(pair[1].name,
                                     pair[1].last_name, pair[1].email))
         await mailing_by_user_tg_id(chat_id=pair[1].tg_id,
-                                    text=MEETING_MESSAGE.format(pair[0].name,
-                                    pair[0].last_name, pair[0].email))
+                                    text=MEETING_MESSAGE.format(pair[0].name, pair[0].last_name, pair[0].email))
+        logger.info(f"Send meeting message to users {pair[0].name} and {pair[1].name}")
 
 
 async def meeting_reminder_mailing(session: AsyncSession):
     users = await User.get_all_is_sent(session)
     await User.set_is_sent_status_false(users, session)
     for user in users:
-        await mailing_by_user_tg_id(chat_id=user.tg_id,
-                                    text=REMINDER_MAILING,
-                                    inline_buttons=meet_inline_buttons)
+        await mailing_by_user_tg_id(chat_id=user.tg_id, text=REMINDER_MAILING, inline_buttons=meet_inline_buttons)
+        logger.info(f"Send reminder message to user {user.name}")
+

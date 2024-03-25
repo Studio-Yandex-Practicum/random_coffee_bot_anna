@@ -1,9 +1,10 @@
 from aiogram import Bot, types
 from aiogram.filters import Filter
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from bot_app.database.models import User
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from bot_app.core.config import settings
+from bot_app.database.models import User
 
 
 class IsAdmin(Filter):

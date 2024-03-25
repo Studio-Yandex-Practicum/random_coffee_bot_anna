@@ -1,18 +1,20 @@
 from datetime import datetime
 
 import asyncio
+
 import pytz
 from aiogram import Dispatcher, types
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from bot_app.core.config import bot
-from bot_app.database.engine import session_maker, get_async_session
+from bot_app.database.engine import get_async_session, session_maker
 from bot_app.handlers.admin import admin_router
 from bot_app.handlers.base_commands import base_commands_router
-from bot_app.handlers.user_registration import user_reg_router
 from bot_app.handlers.callbacks_handler import callback_router
+
+from bot_app.handlers.user_registration import user_reg_router
+from bot_app.mailing.mailing import meeting_mailing, meeting_reminder_mailing
 from bot_app.middleware.dp import DataBaseSession
-from bot_app.mailing.mailing import meeting_reminder_mailing
 from bot_app.mailing.distribution import distribution
 
 

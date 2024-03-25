@@ -2,11 +2,13 @@ from aiogram import F, Router, types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot_app.keyboards.reply import REGISTER_KBRD, MAIN_MENU_ACTIVE_KBRD, CANCEL_KBRD
 from bot_app.database.models import User
 
+logger.add("error_logs.log", level="ERROR")
 
 REGISTER = 'Регистрация'
 CANT_REGISTER = 'Вы уже зарегистрированы'
@@ -48,77 +50,92 @@ async def add_name(
     session: AsyncSession
 ):
     """Начало регистрации пользователя."""
-    if await User.get(session, int(message.from_user.id)):
-        await message.answer(
-            CANT_REGISTER,
-            reply_markup=MAIN_MENU_ACTIVE_KBRD
-        )
-        await state.clear()
-        return
-    else:
-        await message.answer(
-            ADD_NAME,
-            reply_markup=CANCEL_KBRD
-        )
-        await state.set_state(AddUser.name)
+    try:
+        if await User.get(session, int(message.from_user.id)):
+            await message.answer(
+                CANT_REGISTER,
+                reply_markup=MAIN_MENU_ACTIVE_KBRD
+            )
+            await state.clear()
+            return
+        else:
+            await message.answer(
+                ADD_NAME,
+                reply_markup=CANCEL_KBRD
+            )
+            await state.set_state(AddUser.name)
+    except Exception as e:
+        logger.error(f"Error in add_name function: {e}")
 
 
 @user_reg_router.message(StateFilter('*'), Command(CANCEL))
 @user_reg_router.message(StateFilter('*'), F.text.casefold() == CANCEL)
 async def cancel_handler(message: types.Message, state: FSMContext) -> None:
     """Отмена всех действий регистрации."""
-    current_state = await state.get_state()
-    if current_state is None:
-        return
+    try:
+        current_state = await state.get_state()
+        if current_state is None:
+            return
 
-    await state.clear()
-    await message.answer(CANCSEL_MSG, reply_markup=REGISTER_KBRD)
+        await state.clear()
+        await message.answer(CANCSEL_MSG, reply_markup=REGISTER_KBRD)
+    except Exception as e:
+        logger.error(f"Error in cancel_handler function: {e}")
 
 
 @user_reg_router.message(StateFilter('*'), Command(BACK))
 @user_reg_router.message(StateFilter('*'), F.text.casefold() == BACK)
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     """Шаг назад для регистрации."""
-    current_state = await state.get_state()
-    if current_state == AddUser.name:
-        await message.answer(NO_STEP)
-        return
-    previous = None
-    for step in AddUser.__all_states__:
-        if step.state == current_state:
-            await state.set_state(previous)
-            await message.answer(
-                f"""Вы вернулись к предыдущему шагу
-                {AddUser.texts[previous.state]}"""
-            )
+    try:
+        current_state = await state.get_state()
+        if current_state == AddUser.name:
+            await message.answer(NO_STEP)
             return
-        previous = step
+        previous = None
+        for step in AddUser.__all_states__:
+            if step.state == current_state:
+                await state.set_state(previous)
+                await message.answer(
+                    f"""Вы вернулись к предыдущему шагу
+                    {AddUser.texts[previous.state]}"""
+                )
+                return
+            previous = step
+    except Exception as e:
+        logger.error(f"Error in back_step_handler function: {e}")
 
 
 @user_reg_router.message(AddUser.name, F.text)
 async def add_last_name(message: types.Message, state: FSMContext):
     """Добавление фамилии."""
-    name = message.text
-    if check_alpha(name):
-        await state.update_data(name=name)
-        await message.answer(ADD_LAST_NAME)
-        await state.set_state(AddUser.last_name)
-    else:
-        await message.answer(NAME_RULES)
-        await state.set_state(AddUser.name)
+    try:
+        name = message.text
+        if check_alpha(name):
+            await state.update_data(name=name)
+            await message.answer(ADD_LAST_NAME)
+            await state.set_state(AddUser.last_name)
+        else:
+            await message.answer(NAME_RULES)
+            await state.set_state(AddUser.name)
+    except Exception as e:
+        logger.error(f"Error in add_last_name function: {e}")
 
 
 @user_reg_router.message(AddUser.last_name, F.text)
 async def add_mail(message: types.Message, state: FSMContext):
     """Добавление почты."""
-    last_name = message.text
-    if check_alpha(last_name):
-        await state.update_data(last_name=last_name)
-        await message.answer(ADD_EMAIL)
-        await state.set_state(AddUser.email)
-    else:
-        await message.answer(LAST_NAME_RULES)
-        await state.set_state(AddUser.last_name)
+    try:
+        last_name = message.text
+        if check_alpha(last_name):
+            await state.update_data(last_name=last_name)
+            await message.answer(ADD_EMAIL)
+            await state.set_state(AddUser.email)
+        else:
+            await message.answer(LAST_NAME_RULES)
+            await state.set_state(AddUser.last_name)
+    except Exception as e:
+        logger.error(f"Error in add_mail function: {e}")
 
 
 @user_reg_router.message(AddUser.email, F.text.contains(EMAIL_DOMAIN))
@@ -128,23 +145,32 @@ async def refister(
     session: AsyncSession
 ):
     """Окончание регистрации."""
-    tg_user = await User.get_by_email(session, message.text)
-    if tg_user:
-        await message.answer(EMAIL_EXIST)
-    else:
-        await state.update_data(email=message.text)
-        data = await state.get_data()
-        data['tg_id'] = message.from_user.id
-        await User.create(session, data)
-        await state.clear()
-        await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
+    try:
+        tg_user = await User.get_by_email(session, message.text)
+        if tg_user:
+            await message.answer(EMAIL_EXIST)
+        else:
+            await state.update_data(email=message.text)
+            data = await state.get_data()
+            data['tg_id'] = message.from_user.id
+            await User.create(session, data)
+            await state.clear()
+            await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
+    except Exception as e:
+        logger.error(f"Error in refister function: {e}")
 
 
 @user_reg_router.message(AddUser.email)
 async def invalid_mail(message: types.Message, state: FSMContext):
     """Сообщение о неккоректной почте."""
-    await message.answer(INVALID_EMAIL)
+    try:
+        await message.answer(INVALID_EMAIL)
+    except Exception as e:
+        logger.error(f"Error in invalid_mail function: {e}")
 
 
 def check_alpha(input_string):
-    return all(char.isalpha() or char.isspace() for char in input_string)
+    try:
+        return all(char.isalpha() or char.isspace() for char in input_string)
+    except Exception as e:
+        logger.error(f"Error in check_alpha function: {e}")
