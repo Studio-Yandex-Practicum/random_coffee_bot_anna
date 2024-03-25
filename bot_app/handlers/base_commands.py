@@ -12,8 +12,6 @@ from bot_app.keyboards.reply import (
     MAIN_MENU_DEACTIVE_KBRD
 )
 from bot_app.handlers.constants import constants
-from bot_app.keyboards.reply import (MAIN_MENU_KBRD, MORE_KBRD, NEXT_KBRD,
-                                     REGISTER_KBRD)
 
 logger.add("error_logs.log", level="ERROR")
 
@@ -85,7 +83,7 @@ async def about_one(message: types.Message):
     try:
         await message.answer(
             constants['review_msg'],
-            reply_markup=MAIN_MENU_KBRD
+            reply_markup=MAIN_MENU_ACTIVE_KBRD
         )
     except Exception as e:
         logger.error(f"Error in about_one function: {e}")
@@ -95,6 +93,7 @@ async def about_one(message: types.Message):
 async def menu(message: types.Message, session: AsyncSession):
     """Вернуться в главное меню."""
     try:
+        tg_user = await User.get(session, message.from_user.id)
         if tg_user.is_active:
             await message.answer(
                 RETURN_TO_MENU,
