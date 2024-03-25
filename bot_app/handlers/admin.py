@@ -94,6 +94,7 @@ async def delete_user_id(
             await state.clear()
     else:
         await message.answer(NOT_FOUND, reply_markup=ADMIN_KBRD)
+        await state.clear()
 
 
 @admin_router.message(
