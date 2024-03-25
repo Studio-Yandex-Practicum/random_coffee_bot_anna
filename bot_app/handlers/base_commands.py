@@ -72,9 +72,19 @@ async def about_one(message: types.Message):
 
 
 @base_commands_router.message(F.text == MAIN_MENU)
-async def menu(message: types.Message):
+async def menu(message: types.Message, session: AsyncSession):
     """Вернуться в главное меню."""
-    await message.answer(RETURN_TO_MENU, reply_markup=MAIN_MENU_ACTIVE_KBRD)
+    tg_user = await user.get(session, message.from_user.id)
+    if tg_user.is_active:
+        await message.answer(
+            RETURN_TO_MENU,
+            reply_markup=MAIN_MENU_ACTIVE_KBRD
+        )
+    else:
+        await message.answer(
+            RETURN_TO_MENU,
+            reply_markup=MAIN_MENU_DEACTIVE_KBRD
+        )
 
 
 @base_commands_router.message(F.text == STOP_PARTICIPATE)
