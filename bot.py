@@ -50,8 +50,8 @@ async def main() -> None:
 
     sql_session = await anext(get_async_session())
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПН НУЖНО РАЗКОММЕНТИРОВАТЬ СТРОКИ 42-43, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
-    # scheduler.add_job(distribution, args=(sql_session,),
-    #                   next_run_time=datetime.now())
+    scheduler.add_job(distribution, args=(sql_session,),
+                      next_run_time=datetime.now())
     # scheduler.add_job(distribution, args=(sql_session,),
     #                   trigger='cron', day_of_week='thu', hour=19, minute=58)
     scheduler.add_job(distribution, args=(sql_session,),

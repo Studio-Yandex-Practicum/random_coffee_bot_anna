@@ -13,9 +13,9 @@ from bot_app.keyboards.reply import ADMIN_KBRD
 
 logger.add("error_logs.log", level="ERROR")
 
-ADMIN_ONLY = 'Данные действия доступны только администратору'
+ADMIN_ONLY = 'Добро пожаловать в панель администратора!'
 DELETE_COMPLITE = 'Пользователь удалён'
-NOT_FOUND = 'Пользователь не найден'
+NOT_FOUND = 'Пользователь не найден. Введите команду повторно'
 ADD_ID = 'Введите id'
 ALL_USERS = 'Список всех пользователей'
 DELETE_USER = 'Удалить пользователя'
