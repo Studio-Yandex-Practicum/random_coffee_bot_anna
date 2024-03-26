@@ -25,21 +25,10 @@ async def distribution(session):
         if len(actives) % 2:
             i = len(actives) // 2
             extra = actives[i]
-            del extra
+            del actives[i]
             await mailing_by_user_tg_id(chat_id=extra.tg_id, text=TEXT_FOR_EXTRA)
             await User.first_to_end_db(extra, session)
 
         await User.set_is_sent_status_true(actives, session)
         pairs = get_unique_pairs(actives)
         await meeting_mailing(pairs)
-
-
-# async def distribution(session):
-#     actives = await User.get_all_activated(session)
-#     await User.first_to_end_db(actives[0], session)
-#     if len(actives) % 2:
-#         no_pair = actives.pop(len(actives) // 2)
-#         #await mailing_by_user_tg_id(chat_id=no_pair.tg_id, text=TEXT_FOR_EXTRA)
-#         await User.first_to_end_db(session, actives[no_pair])
-#     await User.set_is_sent_status_true(actives, session)
-#     return get_unique_pairs(actives), no_pair
