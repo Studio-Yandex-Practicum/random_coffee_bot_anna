@@ -33,7 +33,7 @@ base_commands_router = Router()
 
 @base_commands_router.message(CommandStart())
 async def start(message: types.Message, session: AsyncSession):
-    """Команда /start."""
+    """Command /start."""
     try:
         tg_user = await User.get(session, message.from_user.id)
         if tg_user:
@@ -46,7 +46,7 @@ async def start(message: types.Message, session: AsyncSession):
 
 @base_commands_router.message(F.text == ABOUT_PROJECT)
 async def about(message: types.Message):
-    """Информация о проекте."""
+    """Information about the project."""
     try:
         await message.answer(constants['about_msg'])
     except Exception as e:
@@ -55,7 +55,7 @@ async def about(message: types.Message):
 
 @base_commands_router.message(F.text.contains(COMMENTS))
 async def about_coll(message: types.Message):
-    """Что о нас думают."""
+    """What they think of us thirst."""
     try:
         await message.answer(
             constants['about_project_msg'],
@@ -67,7 +67,7 @@ async def about_coll(message: types.Message):
 
 @base_commands_router.message(F.text == NEXT_COMMENT)
 async def aboutss(message: types.Message):
-    """Что о нас думают."""
+    """What they think of us second."""
     try:
         await message.answer(
             constants['comments_msg'],
@@ -79,7 +79,7 @@ async def aboutss(message: types.Message):
 
 @base_commands_router.message(F.text == MORE_COMMENT)
 async def about_one(message: types.Message):
-    """Что о нас думают."""
+    """What they think of us third."""
     try:
         await message.answer(
             constants['review_msg'],
@@ -91,7 +91,7 @@ async def about_one(message: types.Message):
 
 @base_commands_router.message(F.text == MAIN_MENU)
 async def menu(message: types.Message, session: AsyncSession):
-    """Вернуться в главное меню."""
+    """Return to main menu."""
     try:
         tg_user = await User.get(session, message.from_user.id)
         if tg_user.is_active:
@@ -110,7 +110,7 @@ async def menu(message: types.Message, session: AsyncSession):
 
 @base_commands_router.message(F.text == STOP_PARTICIPATE)
 async def stop(message: types.Message, session: AsyncSession):
-    """Остановить участие."""
+    """Stop participation."""
     try:
         tg_user = await User.get(session, int(message.from_user.id))
         if await User.activate_deactivate_user(session, tg_user.email):
@@ -126,7 +126,7 @@ async def stop(message: types.Message, session: AsyncSession):
 
 @base_commands_router.message(F.text == RESTART_PARTICIPATE)
 async def up(message: types.Message, session: AsyncSession):
-    """Возобновить участие."""
+    """Resume participation."""
     try:
         tg_user = await User.get(session, int(message.from_user.id))
         if await User.activate_deactivate_user(session, tg_user.email):

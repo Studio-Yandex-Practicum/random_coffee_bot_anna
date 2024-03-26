@@ -1,4 +1,4 @@
-"""Настройки проекта."""
+"""Project settings."""
 from aiogram import Bot
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
