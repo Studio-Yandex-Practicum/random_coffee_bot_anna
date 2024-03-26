@@ -20,10 +20,12 @@ from bot_app.mailing.distribution import distribution
 
 
 async def on_startup():
+    """Startup message."""
     print('Бот запущен')
 
 
 async def on_shutdown():
+    """Shutdown message."""
     print('Бот лег')
 
 
@@ -60,8 +62,8 @@ async def main() -> None:
     #     sql_session,), next_run_time=datetime.now())
     # scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
     #                   day_of_week='thu', hour=19, minute=36)
-    # scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
-    #                   day_of_week='0-6', hour=12, minute=00)
+    scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
+                      day_of_week='0-6', hour=12, minute=00)
     scheduler.start()
     await bot.set_my_commands(COMMANDS)
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
