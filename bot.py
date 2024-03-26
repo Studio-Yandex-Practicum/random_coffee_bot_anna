@@ -5,6 +5,7 @@ import asyncio
 import pytz
 from aiogram import Dispatcher, types
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from aiogram.types import BotCommand
 
 from bot_app.core.config import bot
 from bot_app.database.engine import get_async_session, session_maker
@@ -26,6 +27,12 @@ async def on_startup():
 async def on_shutdown():
     """Shutdown message."""
     print('Бот лег')
+
+
+COMMANDS = [
+        BotCommand(command="/start", description="Перезапустить бота"),
+        BotCommand(command="/admin", description="Панель администратора"),
+    ]
 
 
 async def main() -> None:
@@ -58,7 +65,7 @@ async def main() -> None:
     scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
                       day_of_week='0-6', hour=12, minute=00)
     scheduler.start()
-
+    await bot.set_my_commands(COMMANDS)
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
