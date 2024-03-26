@@ -6,6 +6,7 @@ MESSAGE_CALLBACK = 'Хорошо!'
 
 callback_router = Router()
 
+
 @callback_router.callback_query(F.data == 'button_meeting')
 async def callback_buttons(callback_query: types.CallbackQuery):
     message = await callback_query.bot.send_message(
