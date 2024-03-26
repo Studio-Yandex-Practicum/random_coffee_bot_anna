@@ -11,25 +11,9 @@ from bot_app.keyboards.reply import (
     CANCEL_KBRD,
 )
 from bot_app.database.models import User
+from bot_app.handlers.constants import UserRegictration
 
 logger.add("error_logs.log", level="ERROR")
-
-REGISTER = 'Регистрация'
-CANT_REGISTER = 'Вы уже зарегистрированы'
-ADD_NAME = 'Введите своё имя'
-CANCEL = 'отмена'
-CANCSEL_MSG = 'Действия отменены'
-BACK = 'назад'
-NO_STEP = 'Предыдущего шага нет, введите имя напишите "отмена"'
-ADD_LAST_NAME = 'Введите фамилию'
-ADD_EMAIL = 'Введите почту'
-EMAIL_DOMAIN = '@groupeseb'
-COMPLITE_MSG = 'Регистрация прошла успешно'
-INVALID_EMAIL = 'Вы ввели не корпоративную почту'
-EMAIL_EXIST = 'Пользователь с такой почтой уже существует. Введите другую почту'
-
-NAME_RULES = 'Имя должно содержать только буквы. Пожалуйста, введите имя снова'
-LAST_NAME_RULES = 'Фамилия должна быть только из букв. Введите её заново.'
 
 
 user_reg_router = Router()
@@ -47,7 +31,8 @@ class AddUser(StatesGroup):
     }
 
 
-@user_reg_router.message(StateFilter(None), F.text == REGISTER)
+@user_reg_router.message(StateFilter(None),
+                         F.text == UserRegictration.REGISTER)
 async def add_name(
     message: types.Message,
     state: FSMContext,
@@ -57,14 +42,14 @@ async def add_name(
     try:
         if await User.get(session, int(message.from_user.id)):
             await message.answer(
-                CANT_REGISTER,
+                UserRegictration.CANT_REGISTER,
                 reply_markup=MAIN_MENU_ACTIVE_KBRD
             )
             await state.clear()
             return
         else:
             await message.answer(
-                ADD_NAME,
+                UserRegictration.ADD_NAME,
                 reply_markup=CANCEL_KBRD
             )
             await state.set_state(AddUser.name)
@@ -72,8 +57,9 @@ async def add_name(
         logger.error(f"Error in add_name function: {e}")
 
 
-@user_reg_router.message(StateFilter('*'), Command(CANCEL))
-@user_reg_router.message(StateFilter('*'), F.text.casefold() == CANCEL)
+@user_reg_router.message(StateFilter('*'), Command(UserRegictration.CANCEL))
+@user_reg_router.message(StateFilter('*'),
+                         F.text.casefold() == UserRegictration.CANCEL)
 async def cancel_handler(message: types.Message, state: FSMContext) -> None:
     """Cancels all registration actions."""
     try:
@@ -81,19 +67,23 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
         if current_state is None:
             return
         await state.clear()
-        await message.answer(CANCSEL_MSG, reply_markup=REGISTER_KBRD)
+        await message.answer(
+            UserRegictration.CANCSEL_MSG,
+            reply_markup=REGISTER_KBRD
+        )
     except Exception as e:
         logger.error(f"Error in cancel_handler function: {e}")
 
 
-@user_reg_router.message(StateFilter('*'), Command(BACK))
-@user_reg_router.message(StateFilter('*'), F.text.casefold() == BACK)
+@user_reg_router.message(StateFilter('*'), Command(UserRegictration.BACK))
+@user_reg_router.message(StateFilter('*'),
+                         F.text.casefold() == UserRegictration.BACK)
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     """Step back to register."""
     try:
         current_state = await state.get_state()
         if current_state == AddUser.name:
-            await message.answer(NO_STEP)
+            await message.answer(UserRegictration.NO_STEP)
             return
         previous = None
         for step in AddUser.__all_states__:
@@ -116,10 +106,10 @@ async def add_last_name(message: types.Message, state: FSMContext):
         name = message.text
         if check_alpha(name):
             await state.update_data(name=name)
-            await message.answer(ADD_LAST_NAME)
+            await message.answer(UserRegictration.ADD_LAST_NAME)
             await state.set_state(AddUser.last_name)
         else:
-            await message.answer(NAME_RULES)
+            await message.answer(UserRegictration.NAME_RULES)
             await state.set_state(AddUser.name)
     except Exception as e:
         logger.error(f"Error in add_last_name function: {e}")
@@ -132,16 +122,17 @@ async def add_mail(message: types.Message, state: FSMContext):
         last_name = message.text
         if check_alpha(last_name):
             await state.update_data(last_name=last_name)
-            await message.answer(ADD_EMAIL)
+            await message.answer(UserRegictration.ADD_EMAIL)
             await state.set_state(AddUser.email)
         else:
-            await message.answer(LAST_NAME_RULES)
+            await message.answer(UserRegictration.LAST_NAME_RULES)
             await state.set_state(AddUser.last_name)
     except Exception as e:
         logger.error(f"Error in add_mail function: {e}")
 
 
-@user_reg_router.message(AddUser.email, F.text.contains(EMAIL_DOMAIN))
+@user_reg_router.message(AddUser.email,
+                         F.text.contains(UserRegictration.EMAIL_DOMAIN))
 async def refister(
     message: types.Message,
     state: FSMContext,
@@ -151,14 +142,17 @@ async def refister(
     try:
         tg_user = await User.get_by_email(session, message.text)
         if tg_user:
-            await message.answer(EMAIL_EXIST)
+            await message.answer(UserRegictration.EMAIL_EXIST)
         else:
             await state.update_data(email=message.text)
             data = await state.get_data()
             data['tg_id'] = message.from_user.id
             await User.create(session, data)
             await state.clear()
-            await message.answer(COMPLITE_MSG, reply_markup=MAIN_MENU_ACTIVE_KBRD)
+            await message.answer(
+                UserRegictration.COMPLITE_MSG,
+                reply_markup=MAIN_MENU_ACTIVE_KBRD
+            )
     except Exception as e:
         logger.error(f"Error in refister function: {e}")
 
@@ -167,7 +161,7 @@ async def refister(
 async def invalid_mail(message: types.Message, state: FSMContext):
     """Report about incorrect mail."""
     try:
-        await message.answer(INVALID_EMAIL)
+        await message.answer(UserRegictration.INVALID_EMAIL)
     except Exception as e:
         logger.error(f"Error in invalid_mail function: {e}")
 
