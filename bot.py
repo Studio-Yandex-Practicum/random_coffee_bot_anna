@@ -1,18 +1,20 @@
 from datetime import datetime
 
 import asyncio
+
 import pytz
 from aiogram import Dispatcher, types
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from bot_app.core.config import bot
-from bot_app.database.engine import session_maker, get_async_session
+from bot_app.database.engine import get_async_session, session_maker
 from bot_app.handlers.admin import admin_router
 from bot_app.handlers.base_commands import base_commands_router
-from bot_app.handlers.user_registration import user_reg_router
 from bot_app.handlers.callbacks_handler import callback_router
+
+from bot_app.handlers.user_registration import user_reg_router
+from bot_app.mailing.mailing import meeting_mailing, meeting_reminder_mailing
 from bot_app.middleware.dp import DataBaseSession
-from bot_app.mailing.mailing import meeting_reminder_mailing
 from bot_app.mailing.distribution import distribution
 
 
@@ -45,12 +47,16 @@ async def main() -> None:
     #                   next_run_time=datetime.now())
     # scheduler.add_job(distribution, args=(sql_session,),
     #                   trigger='cron', day_of_week='thu', hour=19, minute=58)
+    scheduler.add_job(distribution, args=(sql_session,),
+                      trigger='cron', day_of_week='0-6', hour=10, minute=00)
 
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПТН НУЖНО РАЗКОММЕНТИРОВАТЬ СТРОКИ 48-49, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
     # scheduler.add_job(meeting_reminder_mailing, args=(
     #     sql_session,), next_run_time=datetime.now())
     # scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
     #                   day_of_week='thu', hour=19, minute=36)
+    scheduler.add_job(meeting_reminder_mailing, args=(sql_session,), trigger='cron',
+                      day_of_week='0-6', hour=12, minute=00)
     scheduler.start()
 
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())

@@ -1,8 +1,8 @@
 """Project settings."""
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from aiogram import Bot
-from aiogram.enums import ParseMode
 from aiogram.client.bot import DefaultBotProperties
+from aiogram.enums import ParseMode
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
