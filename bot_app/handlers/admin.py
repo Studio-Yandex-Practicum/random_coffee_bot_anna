@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot_app.database.models import User
 from bot_app.filters.is_admin import IsAdmin
-from bot_app.keyboards.reply import ADMIN_KBRD
+from bot_app.keyboards.reply import ADMIN_KBRD, CANCEL_ONLY_KBRD
+from bot_app.handlers.user_registration import user_reg_router
 
 logger.add("error_logs.log", level="ERROR")
 
@@ -30,6 +31,9 @@ ANTI_SUCCESS = 'Пользователь перестал быть админи�
 ADMIN_ALREADY = 'Этот пользователь уже администратор'
 REMOVE_USER_FROM_ADMIN = 'Удалить пользователя из админов'
 NON_USER_ADMIN = 'Этот пользователь не является админом'
+CANCEL_ADMIN = 'отменить'
+CANCSEL_MSG = 'Действия отменены'
+ERROR = 'Ошибка'
 
 
 admin_router = Router()
@@ -83,7 +87,7 @@ async def delete_user(message: types.Message, state: FSMContext):
     try:
         await message.answer(
             ADD_EMAIL,
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=CANCEL_ONLY_KBRD
         )
         await state.set_state(DelUser.email)
     except Exception as e:
@@ -110,20 +114,20 @@ async def delete_user_id(
     except Exception as e:
         logger.error(f"Error in delete_user_id function: {e}")
 
-  
+
 @admin_router.message(
-        StateFilter(None),
-        F.text == DEACTIVATE_USER
+    StateFilter(None),
+    F.text == DEACTIVATE_USER
 )
 async def deactive_user(message: types.Message, state: FSMContext):
     """Deactivating user. Waiting for user email."""
     try:
-        await message.answer(ADD_EMAIL, reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(ADD_EMAIL, reply_markup=CANCEL_ONLY_KBRD)
         await state.set_state(DeactiveUser.email)
     except Exception as e:
         logger.error(f"Error in deactive_user function: {e}")
 
-        
+
 @admin_router.message(DeactiveUser.email, F.text)
 async def deactivate_user_id(
     message: types.Message,
@@ -149,23 +153,25 @@ async def deactivate_user_id(
 
 @admin_router.message(F.text == ADD_USER_TO_ADMIN)
 async def add_user_to_admin(message: types.Message, state: FSMContext,
-                            session: AsyncSession):
+                            # session: AsyncSession
+                            ):
     """Adding user to admins."""
     try:
         await state.update_data(email=message.text)
-        await message.answer(ADD_EMAIL)
+        await message.answer(ADD_EMAIL, reply_markup=CANCEL_ONLY_KBRD)
         await state.set_state(AddUserToAdmin.email)
     except Exception as e:
         logger.error(f"Error in add_user_to_admin function: {e}")
 
 
-@admin_router.message(F.text == REMOVE_USER_FROM_ADMIN)
+@admin_router.message(StateFilter(None), F.text == REMOVE_USER_FROM_ADMIN)
 async def remove_user_from_admin(message: types.Message, state: FSMContext,
-                                 session: AsyncSession):
+                                 #  session: AsyncSession
+                                 ):
     """Deleting user from admins. Waiting for user email."""
     try:
         await state.update_data(email=message.text)
-        await message.answer(ADD_EMAIL)
+        await message.answer(ADD_EMAIL, reply_markup=CANCEL_ONLY_KBRD)
         await state.set_state(AddUserToAdmin.rem_email)
     except Exception as e:
         logger.error(f"Error in remove_user_from_admin function: {e}")
@@ -183,14 +189,14 @@ async def add_to_admin(
         user = result.scalars().one_or_none()
         if user:
             if user.is_admin:
-                await message.answer(ADMIN_ALREADY)
+                await message.answer(ADMIN_ALREADY, reply_markup=ADMIN_KBRD)
             else:
                 user.is_admin = True
                 await session.commit()
-                await message.answer(SUCCESS)
+                await message.answer(SUCCESS, reply_markup=ADMIN_KBRD)
                 await state.clear()
         else:
-            await message.answer(NOT_FOUND)
+            await message.answer(NOT_FOUND, reply_markup=ADMIN_KBRD)
     except Exception as e:
         logger.error(f"Error in add_to_admin function: {e}")
 
@@ -201,7 +207,7 @@ async def remove_from_admin(
     state: FSMContext,
     session: AsyncSession
 ):
-    """removing user from admins by email."""
+    """Removing user from admins by email."""
     try:
         result = await session.execute(select(User).filter(User.email == message.text))
         user = result.scalars().one_or_none()
@@ -209,14 +215,27 @@ async def remove_from_admin(
             if user.is_admin:
                 user.is_admin = False
                 await session.commit()
-                await message.answer(ANTI_SUCCESS)
+                await message.answer(ANTI_SUCCESS, reply_markup=ADMIN_KBRD)
                 await state.clear()
             else:
-                await message.answer(NON_USER_ADMIN)
+                await message.answer(NON_USER_ADMIN, reply_markup=ADMIN_KBRD)
                 await state.clear()
         else:
-            await message.answer(NOT_FOUND)
+            await message.answer(NOT_FOUND, reply_markup=ADMIN_KBRD)
             await state.clear()
     except Exception as e:
         logger.error(f"Error in remove_from_admin function: {e}")
 
+
+@user_reg_router.message(StateFilter('*'), Command(CANCEL_ADMIN))
+@user_reg_router.message(StateFilter('*'), F.text.casefold() == CANCEL_ADMIN)
+async def cancel_actions_handler(message: types.Message, state: FSMContext) -> None:
+    """Cancels admin actions."""
+    try:
+        current_state = await state.get_state()
+        if current_state is None:
+            return
+        await state.clear()
+        await message.answer(CANCSEL_MSG, reply_markup=ADMIN_KBRD)
+    except Exception as e:
+        logger.error(f"Error in cancel_handler function: {e}")

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot_app.keyboards.reply import (
     REGISTER_KBRD,
     MAIN_MENU_ACTIVE_KBRD,
-    CANCEL_KBRD,
+    CANCEL_KBRD
 )
 from bot_app.database.models import User
 
@@ -30,7 +30,6 @@ EMAIL_EXIST = 'Пользователь с такой почтой уже сущ
 
 NAME_RULES = 'Имя должно содержать только буквы. Пожалуйста, введите имя снова'
 LAST_NAME_RULES = 'Фамилия должна быть только из букв. Введите её заново.'
-
 
 user_reg_router = Router()
 
