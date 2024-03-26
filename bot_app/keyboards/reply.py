@@ -79,3 +79,8 @@ CANCEL_KBRD = get_keyboard(
     'Назад',
     sizes=[2, ]
 )
+
+CANCEL_ONLY_KBRD = get_keyboard(
+    'Отменить',
+    sizes=[1, ]
+)
