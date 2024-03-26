@@ -50,7 +50,7 @@ async def about(message: types.Message):
 
 @base_commands_router.message(F.text.contains(COMMENTS))
 async def about_coll(message: types.Message):
-    """What they think of us."""
+    """What they think of us thirst."""
     await message.answer(
         constants['about_project_msg'],
         reply_markup=NEXT_KBRD
@@ -59,7 +59,7 @@ async def about_coll(message: types.Message):
 
 @base_commands_router.message(F.text == NEXT_COMMENT)
 async def aboutss(message: types.Message):
-    """What they think of us."""
+    """What they think of us second."""
     await message.answer(
         constants['comments_msg'],
         reply_markup=MORE_KBRD
@@ -68,7 +68,7 @@ async def aboutss(message: types.Message):
 
 @base_commands_router.message(F.text == MORE_COMMENT)
 async def about_one(message: types.Message):
-    """What they think of us."""
+    """What they think of us third."""
     await message.answer(
         constants['review_msg'],
         reply_markup=MAIN_MENU_ACTIVE_KBRD

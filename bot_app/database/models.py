@@ -65,38 +65,38 @@ class User(Base):
 
     @staticmethod
     async def create(session: AsyncSession, data: dict):
-        """Create an object."""
+        """Creating object."""
         session.add(User(**data))
         await session.commit()
 
     @staticmethod
     async def remove(session: AsyncSession, db_obj):
-        """Delete object."""
+        """Deleting object."""
         await session.delete(db_obj)
         await session.commit()
         return db_obj
 
     @staticmethod
     async def get(session: AsyncSession, tg_id: int):
-        """Getting an object by tg_id."""
+        """Getting object by tg_id."""
         db_obj = await session.execute(select(User).where(User.tg_id == tg_id))
         return db_obj.scalars().one_or_none()
 
     @staticmethod
     async def get_by_email(session: AsyncSession, email: str):
-        """Receiving an object by email."""
+        """Getting object by email."""
         db_obj = await session.execute(select(User).where(User.email == email))
         return db_obj.scalars().one_or_none()
 
     @staticmethod
     async def get_all(session: AsyncSession):
-        """Retrieving all objects."""
+        """Getting all objects."""
         users = await session.execute(select(User))
         return users.scalars().all()
 
     @staticmethod
     async def activate_deactivate_user(session: AsyncSession, email: str):
-        """Activate/deactivate an object."""
+        """Activating/deactivating object."""
         result = await session.execute(
             select(User).filter(User.email == email)
         )
@@ -109,7 +109,7 @@ class User(Base):
 
     @staticmethod
     async def get_all_activated(session: AsyncSession):
-        """Retrieving all active objects."""
+        """Getting all active objects."""
         result = await session.execute(
             select(User).filter(User.is_active == 1)
         )
@@ -117,12 +117,13 @@ class User(Base):
 
     @staticmethod
     async def get_all_is_sent(session: AsyncSession):
-        """Receiving all objects to whom the mailing was sent."""
+        """Receiving all objects to whom the mailing with couples was sent."""
         result = await session.execute(select(User).filter(User.is_sent == 1))
         return result.scalars().all()
 
     @staticmethod
     async def first_to_end_db(user, session: AsyncSession):
+        """Moving thirst user to last position in table."""
         await User.remove(session, user)
         user.id = None
         session.expunge(user)
@@ -132,6 +133,7 @@ class User(Base):
 
     @staticmethod
     async def set_is_sent_status_true(users: List, session: AsyncSession):
+        """Changing is_sent status to True."""
         if len(users) > 0:
             for sent in users:
                 sent.is_sent = True if not sent.is_sent else sent.is_sent
@@ -142,6 +144,7 @@ class User(Base):
         users: Optional[List],
         session: AsyncSession
     ):
+        """Changing is_sent status to False."""
         if users is not None:
             for sent in users:
                 sent.is_sent = False

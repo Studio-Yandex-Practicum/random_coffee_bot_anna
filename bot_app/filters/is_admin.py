@@ -8,7 +8,6 @@ from bot_app.core.config import settings
 
 class IsAdmin(Filter):
     """Filter for admin."""
-
     def __init__(self) -> None:
         pass
 

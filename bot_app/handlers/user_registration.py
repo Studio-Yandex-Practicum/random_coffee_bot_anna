@@ -101,7 +101,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
 
 @user_reg_router.message(AddUser.name, F.text)
 async def add_last_name(message: types.Message, state: FSMContext):
-    """Adding a last name."""
+    """Adding last name."""
     name = message.text
     if check_alpha(name):
         await state.update_data(name=name)
@@ -151,4 +151,5 @@ async def invalid_mail(message: types.Message, state: FSMContext):
 
 
 def check_alpha(input_string):
+    """Checking all symbols are letters."""
     return all(char.isalpha() or char.isspace() for char in input_string)

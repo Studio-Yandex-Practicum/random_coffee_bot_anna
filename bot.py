@@ -17,10 +17,12 @@ from bot_app.mailing.distribution import distribution
 
 
 async def on_startup():
+    """Startup message."""
     print('Бот запущен')
 
 
 async def on_shutdown():
+    """Shutdown message."""
     print('Бот лег')
 
 

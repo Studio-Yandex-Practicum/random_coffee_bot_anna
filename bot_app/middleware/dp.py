@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 
 class DataBaseSession(BaseMiddleware):
+    """Database session."""
     def __init__(self, session_pool: async_sessionmaker):
         self.session_pool = session_pool
 
