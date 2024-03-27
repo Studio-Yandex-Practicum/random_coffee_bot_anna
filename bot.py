@@ -14,7 +14,7 @@ from bot_app.handlers.user_registration import user_reg_router
 from bot_app.mailing.mailing import meeting_mailing, meeting_reminder_mailing
 from bot_app.middleware.dp import DataBaseSession
 from bot_app.mailing.distribution import distribution
-from bot_app.core. constants import MailingInt, MailingStr, Messages, Commands
+from bot_app.core.constants import MailingInt, MailingStr, Messages, Commands
 
 
 async def on_startup():
