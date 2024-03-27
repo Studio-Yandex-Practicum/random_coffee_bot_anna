@@ -1,22 +1,17 @@
 from enum import Enum
 
 
-class ActiveKbrd(str, Enum):
+class MainMenuKbrd(str, Enum):
     ABOUT_PROJECT = 'О проекте',
     OUR_COLLEAGUES = 'Наши коллеги про проект «Кофе Bслепую»',
     SUSPEND_PARTICIPATION = 'Приостановить участие',
-
-
-class DeactivateKbrd(str, Enum):
-    ABOUT_PROJECT = 'О проекте',
-    OUR_COLLEAGUES = 'Наши коллеги про проект «Кофе Bслепую»',
     RENEW_PARTICIPATION = 'Возобновить участие',
 
 
 class AdminKbrd(str, Enum):
-    LIST = 'Список всех пользователей',
-    DELETE = 'Удалить пользователя',
-    DEACTIVATE = 'Деактивировать пользователя',
+    USER_LIST = 'Список всех пользователей',
+    DELETE_USER = 'Удалить пользователя',
+    DEACTIVATE_USER = 'Деактивировать пользователя',
     MAIN_MENU = 'Главное меню',
     ADD_ADMIN = 'Добавить пользователя в админы',
     REMOVE_ADMIN = 'Удалить пользователя из админов',
@@ -26,14 +21,10 @@ class Register(str, Enum):
     REGISTRATION = 'Регистрация'
 
 
-class NextKbrd(str, Enum):
-    LISTENING_COMMENT = 'Следующий комментарий',
-    MAIN_MENU = 'Главное меню',
-
-
-class MoreKbrd(str, Enum):
+class NextMoreKbrd(str, Enum):
+    NEXT_COMMENT = 'Следующий комментарий',
+    BACK_TO_MAIN_MENU = 'Главное меню',
     ANOTHER_COMMENT = 'Ещё комментарий',
-    MAIN_MENU = 'Главное меню',
 
 
 class CancelKbrd(str, Enum):

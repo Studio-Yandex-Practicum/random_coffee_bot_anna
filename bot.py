@@ -19,12 +19,12 @@ from bot_app.core. constants import MailingInt, MailingStr, Messages, Commands
 
 async def on_startup():
     """Startup message."""
-    print(Messages.START_UP_MSG.value)
+    print(Messages.START_UP_MSG)
 
 
 async def on_shutdown():
     """Shutdown message."""
-    print(Messages.SHUT_DOWN_MSG.value)
+    print(Messages.SHUT_DOWN_MSG)
 
 
 COMMANDS = [

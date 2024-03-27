@@ -22,6 +22,9 @@ class Messages(str, Enum):
     START_UP_MSG = 'Бот запущен'
     SHUT_DOWN_MSG = 'Бот лег'
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class Commands(str, Enum):
     BOT_RESTART = 'Перезапустить бота'

@@ -5,13 +5,11 @@ from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot_app.keyboards.constants import (
     AdminKbrd,
-    ActiveKbrd,
-    DeactivateKbrd,
     Register,
-    NextKbrd,
-    MoreKbrd,
+    NextMoreKbrd,
     CancelKbrd,
     OnlyKbrd,
+    MainMenuKbrd
 )
 
 
@@ -47,24 +45,24 @@ def get_keyboard(
 
 
 MAIN_MENU_ACTIVE_KBRD = get_keyboard(
-    ActiveKbrd.ABOUT_PROJECT,
-    ActiveKbrd.OUR_COLLEAGUES,
-    ActiveKbrd.SUSPEND_PARTICIPATION,
+    MainMenuKbrd.ABOUT_PROJECT,
+    MainMenuKbrd.OUR_COLLEAGUES,
+    MainMenuKbrd.SUSPEND_PARTICIPATION,
     sizes=[1, 1, 1]
 )
 
 MAIN_MENU_DEACTIVE_KBRD = get_keyboard(
-    DeactivateKbrd.ABOUT_PROJECT,
-    DeactivateKbrd.OUR_COLLEAGUES,
-    DeactivateKbrd.RENEW_PARTICIPATION,
+    MainMenuKbrd.ABOUT_PROJECT,
+    MainMenuKbrd.OUR_COLLEAGUES,
+    MainMenuKbrd.RENEW_PARTICIPATION,
     sizes=[1, 1, 1]
 )
 
 
 ADMIN_KBRD = get_keyboard(
-    AdminKbrd.LIST,
-    AdminKbrd.DELETE,
-    AdminKbrd.DEACTIVATE,
+    AdminKbrd.USER_LIST,
+    AdminKbrd.DELETE_USER,
+    AdminKbrd.DEACTIVATE_USER,
     AdminKbrd.MAIN_MENU,
     AdminKbrd.ADD_ADMIN,
     AdminKbrd.REMOVE_ADMIN,
@@ -74,14 +72,14 @@ ADMIN_KBRD = get_keyboard(
 REGISTER_KBRD = get_keyboard(Register.REGISTRATION)
 
 NEXT_KBRD = get_keyboard(
-    NextKbrd.LISTENING_COMMENT,
-    NextKbrd.MAIN_MENU,
+    NextMoreKbrd.NEXT_COMMENT,
+    NextMoreKbrd.BACK_TO_MAIN_MENU,
     sizes=[2, ]
 )
 
 MORE_KBRD = get_keyboard(
-    MoreKbrd.ANOTHER_COMMENT,
-    MoreKbrd.MAIN_MENU,
+    NextMoreKbrd.ANOTHER_COMMENT,
+    NextMoreKbrd.BACK_TO_MAIN_MENU,
     sizes=[2, ]
 )
 
