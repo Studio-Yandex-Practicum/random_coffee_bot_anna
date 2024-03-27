@@ -1,13 +1,9 @@
-from bot_app.core.config import settings
-from sqlalchemy import (Boolean, CheckConstraint, ForeignKey, Integer, String,
-                        UniqueConstraint, select)
-from typing import List, Optional
-
-# from asyncpg import DatabaseDroppedError
-from sqlalchemy.orm.session import make_transient
+from sqlalchemy import Boolean, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
-                            mapped_column)
+                            make_transient, mapped_column)
+
+from bot_app.core.config import settings
 
 USER = ('{name} '
         '{last_name}\n'
@@ -55,12 +51,10 @@ class User(Base):
         is_admin_text = ', админ' if self.is_admin else ''
         is_active_text = 'активен' if self.is_active else 'неактивен'
         return USER.format(
-            id=self.id,
             name=self.name,
             last_name=self.last_name,
             email=self.email,
             is_active=is_active_text,
-            tg_id=self.tg_id,
             is_admin=is_admin_text,
         )
 
@@ -137,22 +131,3 @@ class User(Base):
         make_transient(user)
         session.add(user)
         await session.commit()
-
-    @staticmethod
-    async def set_is_sent_status_true(users: List, session: AsyncSession):
-        """Changing is_sent status to True."""
-        if len(users) > 0:
-            for sent in users:
-                sent.is_sent = True if not sent.is_sent else sent.is_sent
-            await session.commit()
-
-    @staticmethod
-    async def set_is_sent_status_false(
-        users: Optional[List],
-        session: AsyncSession
-    ):
-        """Changing is_sent status to False."""
-        if users is not None:
-            for sent in users:
-                sent.is_sent = False
-            await session.commit()
