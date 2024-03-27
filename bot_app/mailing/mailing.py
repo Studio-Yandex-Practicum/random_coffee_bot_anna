@@ -9,17 +9,18 @@ from bot_app.core.config import bot
 from bot_app.database.models import User
 from bot_app.mailing.constants import Mailing
 
+
 logger.add("bot_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 
 meet_inline_buttons = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text=Mailing.MEET_OK,
-                              callback_data='button_meeting'),
+                              callback_data=Mailing.BUTTON_MEETING),
          InlineKeyboardButton(text=Mailing.MEET_FALSE,
-                              callback_data='button_meeting')],
+                              callback_data=Mailing.BUTTON_MEETING)],
         [InlineKeyboardButton(text=Mailing.MEET_END_OF_WEEK,
-                              callback_data='button_meeting')],
+                              callback_data=Mailing.BUTTON_MEETING)],
     ])
 
 
@@ -48,7 +49,9 @@ async def meeting_mailing(meetings_pairs: List[Tuple[User, User]] = None):
                                                 pair[0].last_name,
                                                 pair[0].email)
         )
-        logger.info(f"Send meeting message to users {pair[0].name} and {pair[1].name}")
+        logger.info(
+            f'Send meeting message to users {pair[0].name} and {pair[1].name}'
+            )
 
 
 async def meeting_reminder_mailing(session: AsyncSession):
@@ -61,4 +64,4 @@ async def meeting_reminder_mailing(session: AsyncSession):
             text=Mailing.REMINDER_MAILING,
             inline_buttons=meet_inline_buttons
         )
-        logger.info(f"Send reminder message to user {user.name}")
+        logger.info(f'Send reminder message to user {user.name}')

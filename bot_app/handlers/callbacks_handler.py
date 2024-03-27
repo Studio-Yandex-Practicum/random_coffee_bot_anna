@@ -10,7 +10,7 @@ logger.add("error_logs.log", level="ERROR")
 callback_router = Router()
 
 
-@callback_router.callback_query(F.data == 'button_meeting')
+@callback_router.callback_query(F.data == CallbacksHandler.BUTTON_MEETING)
 async def callback_buttons(callback_query: types.CallbackQuery):
     """Callback message."""
     try:
