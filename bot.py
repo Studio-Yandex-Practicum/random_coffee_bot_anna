@@ -62,7 +62,7 @@ async def main() -> None:
     
     scheduler.add_job(distribution, args=(sql_session,),
                       trigger=MailingStr.TRIGGER, day_of_week='0-6',
-                      hour=14, minute=15)
+                      hour=14, minute=30)
 
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПТН НУЖНО РАЗКОММЕНТИРОВАТЬ СЛЕД 2 СТРОКИ, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
     scheduler.add_job(meeting_reminder_mailing, args=(
