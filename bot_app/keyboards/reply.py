@@ -1,3 +1,4 @@
+"""Application keyboard"""
 from typing import List
 
 from aiogram.types import KeyboardButton
@@ -37,14 +38,14 @@ def get_keyboard(
 
 MAIN_MENU_ACTIVE_KBRD = get_keyboard(
     'О проекте',
-    'Наши коллеги про проект «Кофе вслепую»',
+    'Наши коллеги про проект «Кофе Bслепую»',
     'Приостановить участие',
     sizes=[1, 1, 1]
 )
 
 MAIN_MENU_DEACTIVE_KBRD = get_keyboard(
     'О проекте',
-    'Наши коллеги про проект «Кофе вслепую»',
+    'Наши коллеги про проект «Кофе Bслепую»',
     'Возобновить участие',
     sizes=[1, 1, 1]
 )
