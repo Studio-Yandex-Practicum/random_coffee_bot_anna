@@ -13,7 +13,7 @@ from bot_app.keyboards.reply import (
 )
 from bot_app.handlers.constants import constants
 
-logger.add("error_logs.log", level="ERROR")
+logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 
 ABOUT_PROJECT = 'О проекте'

@@ -12,7 +12,7 @@ from bot_app.keyboards.reply import (
 )
 from bot_app.database.models import User
 
-logger.add("error_logs.log", level="ERROR")
+logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 REGISTER = 'Регистрация'
 CANT_REGISTER = 'Вы уже зарегистрированы'

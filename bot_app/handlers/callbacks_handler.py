@@ -4,7 +4,7 @@ from bot_app.core.config import bot
 
 from loguru import logger
 
-logger.add("error_logs.log", level="ERROR")
+logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 MESSAGE_CALLBACK = 'Хорошо!'
 
