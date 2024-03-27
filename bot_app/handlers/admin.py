@@ -12,7 +12,7 @@ from bot_app.filters.is_admin import IsAdmin
 from bot_app.keyboards.reply import ADMIN_KBRD, CANCEL_ONLY_KBRD
 from bot_app.handlers.user_registration import user_reg_router
 
-logger.add("error_logs.log", level="ERROR")
+logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 ADMIN_ONLY = 'Добро пожаловать в панель администратора!'
 DELETE_COMPLITE = 'Пользователь удалён'
