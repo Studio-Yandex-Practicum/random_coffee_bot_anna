@@ -8,12 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot_app.keyboards.reply import (
     REGISTER_KBRD,
     MAIN_MENU_ACTIVE_KBRD,
-    CANCEL_KBRD,
+    CANCEL_KBRD
 )
 from bot_app.database.models import User
 from bot_app.handlers.constants import UserRegistration, Texts
 
-logger.add("error_logs.log", level="ERROR")
+logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 
 user_reg_router = Router()

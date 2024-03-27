@@ -45,6 +45,7 @@ async def main() -> None:
 
     scheduler = AsyncIOScheduler(timezone=TIMEZONE)
     sql_session = await anext(get_async_session())
+
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПН НУЖНО РАЗКОММЕНТИРОВАТЬ СЛЕД 2 СТРОКИ, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
     # scheduler.add_job(distribution, args=(sql_session,),
     #                   next_run_time=datetime.now())

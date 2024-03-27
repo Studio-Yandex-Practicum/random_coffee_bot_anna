@@ -5,7 +5,7 @@ from bot_app.handlers.constants import CallbacksHandler
 
 from loguru import logger
 
-logger.add("error_logs.log", level="ERROR")
+logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 callback_router = Router()
 

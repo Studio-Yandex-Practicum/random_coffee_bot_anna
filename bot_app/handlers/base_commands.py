@@ -13,7 +13,7 @@ from bot_app.keyboards.reply import (
 )
 from bot_app.handlers.constants import BaseCommands, InfoMessage
 
-logger.add("error_logs.log", level="ERROR")
+logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
 
 base_commands_router = Router()
@@ -25,15 +25,21 @@ async def start(message: types.Message, session: AsyncSession):
     try:
         tg_user = await User.get(session, message.from_user.id)
         if tg_user:
+            if tg_user.is_active:
+                await message.answer(
+                    InfoMessage.START_MSG,
+                    reply_markup=MAIN_MENU_ACTIVE_KBRD
+                )
+            else:
+                await message.answer(
+                    InfoMessage.START_MSG,
+                    reply_markup=MAIN_MENU_DEACTIVE_KBRD
+                )
+        else:
             await message.answer(
                 InfoMessage.START_MSG,
                 reply_markup=REGISTER_KBRD
             )
-            return
-        await message.answer(
-            InfoMessage.START_MSG,
-            reply_markup=REGISTER_KBRD
-        )
     except Exception as e:
         logger.error(f"Error in start function: {e}")
 
