@@ -131,4 +131,3 @@ class Texts(str, Enum):
     ENTER_NAME = 'Введите имя заново:'
     ENTER_LAST_NAME = 'Введите фамилию заново:'
     ENTER_EMAIL = 'Введите мэйл заново:'
-
