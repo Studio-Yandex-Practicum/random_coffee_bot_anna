@@ -3,6 +3,16 @@ from typing import List
 
 from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from bot_app.keyboards.constants import (
+    AdminKbrd,
+    ActiveKbrd,
+    DeactivateKbrd,
+    Register,
+    NextKbrd,
+    MoreKbrd,
+    CancelKbrd,
+    OnlyKbrd,
+)
 
 
 def get_keyboard(
@@ -17,11 +27,11 @@ def get_keyboard(
     of btns args for buttons you need.
     Example:
     get_keyboard(
-            'О нас',
-            'Регистрация',
-            'Приостановить общение',
+            'About us',
+            'Registration',
+            'Pause communication',
             request_contact=4,
-            sizes=(2, 2, 1)
+            sizes=[2, 2, 1]
         )
     '''
     keyboard = ReplyKeyboardBuilder()
@@ -37,51 +47,51 @@ def get_keyboard(
 
 
 MAIN_MENU_ACTIVE_KBRD = get_keyboard(
-    'О проекте',
-    'Наши коллеги про проект «Кофе Bслепую»',
-    'Приостановить участие',
+    ActiveKbrd.ABOUT_PROJECT,
+    ActiveKbrd.OUR_COLLEAGUES,
+    ActiveKbrd.SUSPEND_PARTICIPATION,
     sizes=[1, 1, 1]
 )
 
 MAIN_MENU_DEACTIVE_KBRD = get_keyboard(
-    'О проекте',
-    'Наши коллеги про проект «Кофе Bслепую»',
-    'Возобновить участие',
+    DeactivateKbrd.ABOUT_PROJECT,
+    DeactivateKbrd.OUR_COLLEAGUES,
+    DeactivateKbrd.RENEW_PARTICIPATION,
     sizes=[1, 1, 1]
 )
 
 
 ADMIN_KBRD = get_keyboard(
-    'Список всех пользователей',
-    'Удалить пользователя',
-    'Деактивировать пользователя',
-    'Главное меню',
-    'Добавить пользователя в админы',
-    'Удалить пользователя из админов',
+    AdminKbrd.LIST,
+    AdminKbrd.DELETE,
+    AdminKbrd.DEACTIVATE,
+    AdminKbrd.MAIN_MENU,
+    AdminKbrd.ADD_ADMIN,
+    AdminKbrd.REMOVE_ADMIN,
     sizes=[2, 2]
 )
 
-REGISTER_KBRD = get_keyboard('Регистрация')
+REGISTER_KBRD = get_keyboard(Register.REGISTRATION)
 
 NEXT_KBRD = get_keyboard(
-    'Следующий комментарий',
-    'Главное меню',
+    NextKbrd.LISTENING_COMMENT,
+    NextKbrd.MAIN_MENU,
     sizes=[2, ]
 )
 
 MORE_KBRD = get_keyboard(
-    'Ещё комментарий',
-    'Главное меню',
+    MoreKbrd.ANOTHER_COMMENT,
+    MoreKbrd.MAIN_MENU,
     sizes=[2, ]
 )
 
 CANCEL_KBRD = get_keyboard(
-    'Отмена',
-    'Назад',
+    CancelKbrd.CANCELLATION,
+    CancelKbrd.BACK,
     sizes=[2, ]
 )
 
 CANCEL_ONLY_KBRD = get_keyboard(
-    'Отменить',
+    OnlyKbrd.CANCEL,
     sizes=[1, ]
 )
