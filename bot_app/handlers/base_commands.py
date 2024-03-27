@@ -37,9 +37,21 @@ async def start(message: types.Message, session: AsyncSession):
     try:
         tg_user = await User.get(session, message.from_user.id)
         if tg_user:
-            await message.answer(constants['START_MSG'], reply_markup=REGISTER_KBRD)
-            return
-        await message.answer(constants['START_MSG'], reply_markup=REGISTER_KBRD)
+            if tg_user.is_active:
+                await message.answer(
+                    constants['START_MSG'],
+                    reply_markup=MAIN_MENU_ACTIVE_KBRD
+                )
+            else:
+                await message.answer(
+                    constants['START_MSG'],
+                    reply_markup=MAIN_MENU_DEACTIVE_KBRD
+                )
+        else:
+            await message.answer(
+                constants['START_MSG'],
+                reply_markup=REGISTER_KBRD
+            )
     except Exception as e:
         logger.error(f"Error in start function: {e}")
 
