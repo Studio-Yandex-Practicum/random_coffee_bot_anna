@@ -19,6 +19,8 @@ class AdminConsts(str, Enum):
     ADMIN_ALREADY = 'Этот пользователь уже администратор'
     REMOVE_USER_FROM_ADMIN = 'Удалить пользователя из админов'
     NON_USER_ADMIN = 'Этот пользователь не является админом'
+    CANCEL_ADMIN = 'отменить'
+    CANCSEL_MSG = 'Действия отменены'
 
 
 class InfoMessage(str, Enum):

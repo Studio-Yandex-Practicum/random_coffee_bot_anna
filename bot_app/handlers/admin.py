@@ -141,20 +141,23 @@ async def add_user_to_admin(message: types.Message, state: FSMContext,
     """Adding user to admins."""
     try:
         await state.update_data(email=message.text)
-        await message.answer(AdminConsts.ADD_EMAIL, reply_markup=CANCEL_ONLY_KBRD)
+        await message.answer(AdminConsts.ADD_EMAIL,
+                             reply_markup=CANCEL_ONLY_KBRD)
         await state.set_state(AddUserToAdmin.email)
     except Exception as e:
         logger.error(f"Error in add_user_to_admin function: {e}")
 
 
-@admin_router.message(StateFilter(None),F.text == AdminConsts.REMOVE_USER_FROM_ADMIN)
+@admin_router.message(StateFilter(None),
+                      F.text == AdminConsts.REMOVE_USER_FROM_ADMIN)
 async def remove_user_from_admin(message: types.Message, state: FSMContext,
                                  #  session: AsyncSession
                                  ):
     """Deleting user from admins. Waiting for user email."""
     try:
         await state.update_data(email=message.text)
-        await message.answer(AdminConsts.ADD_EMAIL, reply_markup=CANCEL_ONLY_KBRD)
+        await message.answer(AdminConsts.ADD_EMAIL,
+                             reply_markup=CANCEL_ONLY_KBRD)
         await state.set_state(AddUserToAdmin.rem_email)
     except Exception as e:
         logger.error(f"Error in remove_user_from_admin function: {e}")
@@ -174,14 +177,17 @@ async def add_to_admin(
         user = result.scalars().one_or_none()
         if user:
             if user.is_admin:
-                await message.answer(AdminConsts.ADMIN_ALREADY, reply_markup=ADMIN_KBRD)
+                await message.answer(AdminConsts.ADMIN_ALREADY,
+                                     reply_markup=ADMIN_KBRD)
             else:
                 user.is_admin = True
                 await session.commit()
-                await message.answer(AdminConsts.SUCCESS, reply_markup=ADMIN_KBRD)
+                await message.answer(AdminConsts.SUCCESS,
+                                     reply_markup=ADMIN_KBRD)
                 await state.clear()
         else:
-            await message.answer(AdminConsts.NOT_FOUND, reply_markup=ADMIN_KBRD)
+            await message.answer(AdminConsts.NOT_FOUND,
+                                 reply_markup=ADMIN_KBRD)
     except Exception as e:
         logger.error(f"Error in add_to_admin function: {e}")
 
@@ -202,28 +208,33 @@ async def remove_from_admin(
             if user.is_admin:
                 user.is_admin = False
                 await session.commit()
-                await message.answer(AdminConsts.ANTI_SUCCESS, reply_markup=ADMIN_KBRD)
+                await message.answer(AdminConsts.ANTI_SUCCESS,
+                                     reply_markup=ADMIN_KBRD)
                 await state.clear()
             else:
-                await message.answer(AdminConsts.NON_USER_ADMIN, reply_markup=ADMIN_KBRD)
+                await message.answer(AdminConsts.NON_USER_ADMIN,
+                                     reply_markup=ADMIN_KBRD)
                 await state.clear()
         else:
-            await message.answer(AdminConsts.NOT_FOUND, reply_markup=ADMIN_KBRD)
+            await message.answer(AdminConsts.NOT_FOUND,
+                                 reply_markup=ADMIN_KBRD)
             await state.clear()
     except Exception as e:
         logger.error(f"Error in remove_from_admin function: {e}")
 
-        
-@user_reg_router.message(StateFilter('*'), Command(CANCEL_ADMIN))
-@user_reg_router.message(StateFilter('*'), F.text.casefold() == CANCEL_ADMIN)
-async def cancel_actions_handler(message: types.Message, state: FSMContext) -> None:
+
+@user_reg_router.message(StateFilter('*'), Command(AdminConsts.CANCEL_ADMIN))
+@user_reg_router.message(StateFilter('*'),
+                         F.text.casefold() == AdminConsts.CANCEL_ADMIN)
+async def cancel_actions_handler(
+    message: types.Message, state: FSMContext
+) -> None:
     """Cancels admin actions."""
     try:
         current_state = await state.get_state()
         if current_state is None:
             return
         await state.clear()
-        await message.answer(CANCSEL_MSG, reply_markup=ADMIN_KBRD)
+        await message.answer(AdminConsts.CANCSEL_MSG, reply_markup=ADMIN_KBRD)
     except Exception as e:
         logger.error(f"Error in cancel_handler function: {e}")
-
