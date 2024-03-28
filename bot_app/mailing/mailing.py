@@ -8,39 +8,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot_app.core.config import bot, settings
 from bot_app.database.models import User
 from bot_app.mailing.distribution import distribute_pairs
+from bot_app.mailing.constants import Mailing
+
 
 logger.add('bot_logs.log', rotation='500 MB', backtrace=True, diagnose=True)
 
-MEETING_MESSAGE = '''
-Ваша пара для Кофе вслепую {} {} ({}).
-Договоритесь с коллегой о кофе брейке на этой неделе.
-Приятного времяпровождения!
-'''
-MEET_OK = 'Да'
-MEET_FALSE = 'Нет'
-MEET_END_OF_WEEK = 'Встретимся в конце недели'
-REMINDER_MAILING = '''
-Удалось ли уже встретиться с коллегой и выпить чашечку кофе?
-'''
-TEXT_NO_PAIR = '''
-Привет! На этой неделе в нашем проекте «Кофе вслепую» нечетное количество
-участников, поэтому имя коллеги тебе придет на следующей неделе.
-Но сейчас не теряй возможность, пригласи на чашечку кофе любого
-коллегу и предложи ему присоединиться к нашему проекту
-(конечно, если он еще не участвует)!
-Отличного дня и продуктивной недели😊
-'''
 NO_ACTIVE = '''
 Проект "Кофе Вслепую" не работает из-за отсутствия активных участников.
 '''
 
 meet_inline_buttons = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text=MEET_OK, callback_data='button_meeting'),
-         InlineKeyboardButton(text=MEET_FALSE,
-                              callback_data='button_meeting')],
-        [InlineKeyboardButton(text=MEET_END_OF_WEEK,
-                              callback_data='button_meeting')],
+        [InlineKeyboardButton(text=Mailing.MEET_OK,
+                              callback_data=Mailing.BUTTON_MEETING),
+         InlineKeyboardButton(text=Mailing.MEET_FALSE,
+                              callback_data=Mailing.BUTTON_MEETING)],
+        [InlineKeyboardButton(text=Mailing.MEET_END_OF_WEEK,
+                              callback_data=Mailing.BUTTON_MEETING)],
     ])
 
 
@@ -89,13 +73,16 @@ async def meeting_reminder_mailing(session: AsyncSession):
 
 async def newsletter_about_the_meeting(session: AsyncSession):
     data = await distribute_pairs(session)
-    print(settings.gen_admin_id)
     if data.get('pairs'):
         await meeting_mailing(session, data['pairs'])
     else:
         await bot.send_message(chat_id=settings.gen_admin_id,
                                text=NO_ACTIVE)
+        logger.info(
+            f'Send warning message to genadmin id {settings.gen_admin_id}'
+            )
     if data.get('no_pair'):
         await mailing_by_user_tg_id(
             chat_id=data['no_pair'].tg_id, text=TEXT_NO_PAIR
         )
+        logger.info(f'Send sorry message to user {data["no_pair"].name}')
