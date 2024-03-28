@@ -89,13 +89,16 @@ async def meeting_reminder_mailing(session: AsyncSession):
 
 async def newsletter_about_the_meeting(session: AsyncSession):
     data = await distribute_pairs(session)
-    print(settings.gen_admin_id)
     if data.get('pairs'):
         await meeting_mailing(session, data['pairs'])
     else:
         await bot.send_message(chat_id=settings.gen_admin_id,
                                text=NO_ACTIVE)
+        logger.info(
+            f'Send warning message to genadmin id {settings.gen_admin_id}'
+            )
     if data.get('no_pair'):
         await mailing_by_user_tg_id(
             chat_id=data['no_pair'].tg_id, text=TEXT_NO_PAIR
         )
+        logger.info(f'Send sorry message to user {data["no_pair"].name}')
