@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot_app.core.config import bot, settings
 from bot_app.database.models import User
 from bot_app.mailing.distribution import distribute_pairs
-from bot_app.mailing.constants import Mailing
+from bot_app.mailing.constants import Distribution, Mailing
 
 
 logger.add('bot_logs.log', rotation='500 MB', backtrace=True, diagnose=True)
@@ -44,13 +44,17 @@ async def meeting_mailing(
 ):
     """Mailing to pairs."""
     for pair in meetings_pairs:
-        await mailing_by_user_tg_id(chat_id=pair[0].tg_id,
-                                    text=MEETING_MESSAGE.format(pair[1].name,
-                                    pair[1].last_name, pair[1].email))
+        await mailing_by_user_tg_id(
+            chat_id=pair[0].tg_id,
+            text=Mailing.MEETING_MESSAGE.format(
+                pair[1].name, pair[1].last_name, pair[1].email
+            ))
         pair[0].is_sent = True
-        await mailing_by_user_tg_id(chat_id=pair[1].tg_id,
-                                    text=MEETING_MESSAGE.format(pair[0].name,
-                                    pair[0].last_name, pair[0].email))
+        await mailing_by_user_tg_id(
+            chat_id=pair[1].tg_id,
+            text=Mailing.MEETING_MESSAGE.format(
+                pair[0].name, pair[0].last_name, pair[0].email
+            ))
         pair[1].is_sent = True
         await session.commit()
         logger.info(
@@ -63,7 +67,7 @@ async def meeting_reminder_mailing(session: AsyncSession):
     for user in await User.get_all_is_sent(session):
         await mailing_by_user_tg_id(
             chat_id=user.tg_id,
-            text=REMINDER_MAILING,
+            text=Mailing.REMINDER_MAILING,
             inline_buttons=meet_inline_buttons
         )
         user.is_sent = False
@@ -83,6 +87,6 @@ async def newsletter_about_the_meeting(session: AsyncSession):
             )
     if data.get('no_pair'):
         await mailing_by_user_tg_id(
-            chat_id=data['no_pair'].tg_id, text=TEXT_NO_PAIR
+            chat_id=data['no_pair'].tg_id, text=Distribution.TEXT_NO_PAIR
         )
         logger.info(f'Send sorry message to user {data["no_pair"].name}')

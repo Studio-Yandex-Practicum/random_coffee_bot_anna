@@ -34,7 +34,7 @@ class AddUserToAdmin(StatesGroup):
 
 
 @admin_router.message(StateFilter(None), Command('admin'))
-async def get_admin_commands(message: types.Message, session: AsyncSession):
+async def get_admin_commands(message: types.Message):
     """Getting admin keyboard."""
     try:
         await message.answer(AdminConsts.ADMIN_ONLY, reply_markup=ADMIN_KBRD)
@@ -78,8 +78,8 @@ async def delete_user_id(
 ):
     """Removing user by email."""
     try:
-        await state.update_data(email=message.text)
-        tg_user = await User.get_by_email(session, message.text)
+        await state.update_data(email=message.text.lower())
+        tg_user = await User.get_by_email(session, message.text.lower())
         if tg_user:
             if await User.remove(session, tg_user):
                 await message.answer(
@@ -118,9 +118,8 @@ async def deactivate_user_id(
 ):
     """Deactivating user by email."""
     try:
-        await state.update_data(email=message.text)
-        deactive = await User.activate_deactivate_user(session, message.text)
-        if deactive:
+        await state.update_data(email=message.text.lower())
+        if await User.activate_deactivate_user(session, message.text.lower()):
             await message.answer(
                 AdminConsts.DEACTIVATE_COMPLITE,
                 reply_markup=ADMIN_KBRD
@@ -135,12 +134,10 @@ async def deactivate_user_id(
 
 
 @admin_router.message(F.text == AdminConsts.ADD_USER_TO_ADMIN)
-async def add_user_to_admin(message: types.Message, state: FSMContext,
-                            # session: AsyncSession
-                            ):
+async def add_user_to_admin(message: types.Message, state: FSMContext):
     """Adding user to admins."""
     try:
-        await state.update_data(email=message.text)
+        await state.update_data(email=message.text.lower())
         await message.answer(AdminConsts.ADD_EMAIL,
                              reply_markup=CANCEL_ONLY_KBRD)
         await state.set_state(AddUserToAdmin.email)
@@ -150,12 +147,10 @@ async def add_user_to_admin(message: types.Message, state: FSMContext,
 
 @admin_router.message(StateFilter(None),
                       F.text == AdminConsts.REMOVE_USER_FROM_ADMIN)
-async def remove_user_from_admin(message: types.Message, state: FSMContext,
-                                 #  session: AsyncSession
-                                 ):
+async def remove_user_from_admin(message: types.Message, state: FSMContext):
     """Deleting user from admins. Waiting for user email."""
     try:
-        await state.update_data(email=message.text)
+        await state.update_data(email=message.text.lower())
         await message.answer(AdminConsts.ADD_EMAIL,
                              reply_markup=CANCEL_ONLY_KBRD)
         await state.set_state(AddUserToAdmin.rem_email)
@@ -172,7 +167,7 @@ async def add_to_admin(
     """Adding user to admins by email."""
     try:
         result = await session.execute(
-            select(User).filter(User.email == message.text)
+            select(User).filter(User.email == message.text.lower())
         )
         user = result.scalars().one_or_none()
         if user:
@@ -201,7 +196,7 @@ async def remove_from_admin(
     """Removing user from admins by email."""
     try:
         result = await session.execute(
-            select(User).filter(User.email == message.text)
+            select(User).filter(User.email == message.text.lower())
         )
         user = result.scalars().one_or_none()
         if user:
