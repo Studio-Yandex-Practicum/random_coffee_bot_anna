@@ -1,31 +1,24 @@
-from typing import List
+from typing import Iterable, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot_app.database.models import User
-from bot_app.mailing.mailing import mailing_by_user_tg_id, meeting_mailing
-from bot_app.mailing.constants import Distribution
 
 
-def get_unique_pairs(users: List):
+def get_unique_pairs(users: Iterable) -> List[tuple]:
     """Making pairs."""
-    return list(zip(users[:len(users)], reversed(users[len(users) // 2:])))
+    return list(
+        zip(users[:len(users) // 2], reversed(users[len(users) // 2:]))
+    )
 
 
-async def distribution(session: AsyncSession):
-    """Distribution algorithm."""
+async def distribute_pairs(session: AsyncSession) -> dict:
+    """Distributes pairs of users.."""
     actives = await User.get_all_activated(session)
-    if len(actives) > 1:
+    if actives:
         await User.first_to_end_db(actives[0], session)
-        if len(actives) % 2:
-            i = len(actives) // 2
-            extra = actives[i]
-            del actives[i]
-            await mailing_by_user_tg_id(
-                chat_id=extra.tg_id, text=Distribution.TEXT_FOR_EXTRA
-            )
-            await User.first_to_end_db(extra, session)
-
-        await User.set_is_sent_status_true(actives, session)
-        pairs = get_unique_pairs(actives)
-        await meeting_mailing(pairs)
+    if not len(actives) % 2:
+        return {'pairs': get_unique_pairs(actives)}
+    no_pair = actives.pop(len(actives) // 2)
+    await User.first_to_end_db(no_pair, session)
+    return {'pairs': get_unique_pairs(actives), 'no_pair': no_pair}

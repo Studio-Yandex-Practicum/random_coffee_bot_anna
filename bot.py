@@ -11,9 +11,9 @@ from bot_app.handlers.admin import admin_router
 from bot_app.handlers.base_commands import base_commands_router
 from bot_app.handlers.callbacks_handler import callback_router
 from bot_app.handlers.user_registration import user_reg_router
-from bot_app.mailing.mailing import meeting_mailing, meeting_reminder_mailing
+from bot_app.mailing.mailing import (meeting_reminder_mailing,
+                                     newsletter_about_the_meeting)
 from bot_app.middleware.dp import DataBaseSession
-from bot_app.mailing.distribution import distribution
 from bot_app.core. constants import MailingInt, MailingStr, Messages, Commands
 
 
@@ -45,9 +45,9 @@ async def main() -> None:
 
     scheduler = AsyncIOScheduler(timezone=TIMEZONE)
     sql_session = await anext(get_async_session())
-
+    
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПН НУЖНО РАЗКОММЕНТИРОВАТЬ СЛЕД 2 СТРОКИ, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
-    # scheduler.add_job(distribution, args=(sql_session,),
+    # scheduler.add_job(newsletter_about_the_meeting, args=(sql_session,),
     #                   next_run_time=datetime.now())
     # scheduler.add_job(
     #     distribution, args=(sql_session,),
@@ -62,11 +62,11 @@ async def main() -> None:
     
     scheduler.add_job(distribution, args=(sql_session,),
                       trigger=MailingStr.TRIGGER, day_of_week='0-6',
-                      hour=14, minute=15)
+                      hour=14, minute=00)
 
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПТН НУЖНО РАЗКОММЕНТИРОВАТЬ СЛЕД 2 СТРОКИ, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
-    scheduler.add_job(meeting_reminder_mailing, args=(
-        sql_session,), next_run_time=datetime.now())
+    # scheduler.add_job(meeting_reminder_mailing, args=(
+    #     sql_session,), next_run_time=datetime.now())
     # scheduler.add_job(
     #     meeting_reminder_mailing, args=(sql_session,),
     #     trigger=MailingStr.TRIGGER,
@@ -85,7 +85,10 @@ async def main() -> None:
     await bot.set_my_commands(COMMANDS)
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
-
+    try:
+        await dp.start_polling(bot,
+                               allowed_updates=dp.resolve_used_update_types())
+    finally:
+        await bot.session.close()
 
 asyncio.run(main())
