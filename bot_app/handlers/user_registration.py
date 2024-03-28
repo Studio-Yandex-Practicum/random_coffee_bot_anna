@@ -25,9 +25,9 @@ class AddUser(StatesGroup):
     email = State()
 
     texts = {
-        'AddUser:name': Texts.ENTER_NAME.value,
-        'AddUser:last_name': Texts.ENTER_LAST_NAME.value,
-        'AddUser:mail': Texts.ENTER_EMAIL.value,
+        'AddUser:name': Texts.ENTER_NAME,
+        'AddUser:last_name': Texts.ENTER_LAST_NAME,
+        'AddUser:mail': Texts.ENTER_EMAIL,
     }
 
 
