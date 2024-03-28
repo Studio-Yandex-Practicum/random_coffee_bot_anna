@@ -58,7 +58,7 @@ async def main() -> None:
     # )
     scheduler.add_job(newsletter_about_the_meeting, args=(sql_session,),
                       trigger=MailingStr.TRIGGER, day_of_week='0-6',
-                      hour=10, minute=00)
+                      hour=19, minute=45)
 
     scheduler.add_job(newsletter_about_the_meeting, args=(sql_session,),
                       trigger=MailingStr.TRIGGER, day_of_week='0-6',
