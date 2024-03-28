@@ -47,8 +47,8 @@ async def main() -> None:
     sql_session = await anext(get_async_session())
 
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПН НУЖНО РАЗКОММЕНТИРОВАТЬ СЛЕД 2 СТРОКИ, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
-    # scheduler.add_job(distribution, args=(sql_session,),
-    #                   next_run_time=datetime.now())
+    scheduler.add_job(distribution, args=(sql_session,),
+                      next_run_time=datetime.now())
     # scheduler.add_job(
     #     distribution, args=(sql_session,),
     #     trigger=MailingStr.TRIGGER,
@@ -65,8 +65,8 @@ async def main() -> None:
                       hour=14, minute=30)
 
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПТН НУЖНО РАЗКОММЕНТИРОВАТЬ СЛЕД 2 СТРОКИ, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
-    scheduler.add_job(meeting_reminder_mailing, args=(
-        sql_session,), next_run_time=datetime.now())
+    # scheduler.add_job(meeting_reminder_mailing, args=(
+    #     sql_session,), next_run_time=datetime.now())
     # scheduler.add_job(
     #     meeting_reminder_mailing, args=(sql_session,),
     #     trigger=MailingStr.TRIGGER,
