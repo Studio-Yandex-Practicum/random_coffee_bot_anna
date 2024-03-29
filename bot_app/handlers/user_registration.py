@@ -146,11 +146,11 @@ async def refister(
 ):
     """End of registration."""
     try:
-        tg_user = await User.get_by_email(session, message.text)
+        tg_user = await User.get_by_email(session, message.text.lower())
         if tg_user:
             await message.answer(UserRegistration.EMAIL_EXIST)
         else:
-            await state.update_data(email=message.text)
+            await state.update_data(email=message.text.lower())
             data = await state.get_data()
             data['tg_id'] = message.from_user.id
             await User.create(session, data)
