@@ -1,12 +1,10 @@
 from aiogram import types
 from aiogram.filters import Filter
 
-from bot_app.handlers.constants import (AdminConsts,
-                                        BaseCommands,
-                                        UserRegistration, Texts)
-from bot_app.keyboards.constants import (MainMenuKbrd,
-                                         AdminKbrd, Register,
-                                         NextMoreKbrd, CancelKbrd, OnlyKbrd)
+from bot_app.handlers.constants import (AdminConsts, BaseCommands, Texts,
+                                        UserRegistration)
+from bot_app.keyboards.constants import (AdminKbrd, CancelKbrd, MainMenuKbrd,
+                                         NextMoreKbrd, OnlyKbrd, Register)
 from bot_app.mailing.constants import Mailing
 
 

@@ -1,21 +1,18 @@
 from aiogram import F, Router, types
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, StateFilter, Command
+from aiogram.types import FSInputFile
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from aiogram.filters import StateFilter
+from bot_app.core.config import bot
 from bot_app.core.constants import Messages
 from bot_app.database.models import User
-from bot_app.keyboards.reply import (
-    REGISTER_KBRD,
-    NEXT_KBRD,
-    MORE_KBRD,
-    MAIN_MENU_ACTIVE_KBRD,
-    MAIN_MENU_DEACTIVE_KBRD,
-    MAIN_MENU_NOREG_KBRD
-)
-from bot_app.handlers.constants import BaseCommands, InfoMessage
 from bot_app.filters.other_messages import OtherMsgsFilter
+from bot_app.handlers.constants import BaseCommands, InfoMessage
+from bot_app.keyboards.reply import (MAIN_MENU_ACTIVE_KBRD,
+                                     MAIN_MENU_DEACTIVE_KBRD,
+                                     MAIN_MENU_NOREG_KBRD, MORE_KBRD,
+                                     NEXT_KBRD, REGISTER_KBRD)
 
 logger.add("error_logs.log", rotation="30 MB", backtrace=True, diagnose=True)
 
@@ -47,6 +44,16 @@ async def start(message: types.Message, session: AsyncSession):
     except Exception as e:
         await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in start function: {e}")
+
+
+@base_commands_router.message(Command('help'))
+async def send_help(message: types.Message):
+    """Command /help."""
+    pdf_file = FSInputFile('instruction.pdf')
+    await bot.send_document(
+        message.from_user.id,
+        document=pdf_file,
+        caption=BaseCommands.HELP)
 
 
 @base_commands_router.message(F.text == BaseCommands.ABOUT_PROJECT)

@@ -1,10 +1,11 @@
 import asyncio
+
 from aiogram import F, Router, types
+from loguru import logger
+
 from bot_app.core.config import bot
 from bot_app.core.constants import Messages
 from bot_app.handlers.constants import CallbacksHandler
-
-from loguru import logger
 
 logger.add("error_logs.log", rotation="30 MB", backtrace=True, diagnose=True)
 

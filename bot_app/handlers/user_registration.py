@@ -6,13 +6,13 @@ from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot_app.core.constants import Messages
-from bot_app.keyboards.reply import (
-    REGISTER_KBRD,
-    MAIN_MENU_ACTIVE_KBRD,
-    CANCEL_KBRD
-)
 from bot_app.database.models import User
-from bot_app.handlers.constants import UserRegistration, Texts
+from bot_app.handlers.constants import Texts, UserRegistration
+from bot_app.keyboards.reply import (
+    CANCEL_KBRD,
+    MAIN_MENU_ACTIVE_KBRD,
+    REGISTER_KBRD
+)
 
 logger.add("error_logs.log", rotation="30 MB", backtrace=True, diagnose=True)
 

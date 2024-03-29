@@ -11,8 +11,8 @@ from bot_app.core.constants import Messages
 from bot_app.database.models import User
 from bot_app.filters.is_admin import IsAdmin
 from bot_app.handlers.constants import AdminConsts
-from bot_app.keyboards.reply import ADMIN_KBRD, CANCEL_ONLY_KBRD
 from bot_app.handlers.user_registration import user_reg_router
+from bot_app.keyboards.reply import ADMIN_KBRD, CANCEL_ONLY_KBRD
 
 logger.add("error_logs.log", rotation="30 MB", backtrace=True, diagnose=True)
 

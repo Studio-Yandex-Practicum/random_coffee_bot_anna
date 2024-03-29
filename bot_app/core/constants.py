@@ -31,3 +31,4 @@ class Messages(str, Enum):
 class Commands(str, Enum):
     BOT_RESTART = 'Перезапустить бота'
     ADMIN_PANEL = 'Панель администратора'
+    HELP = 'Помощь'

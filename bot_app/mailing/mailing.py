@@ -7,9 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot_app.core.config import bot, settings
 from bot_app.database.models import User
-from bot_app.mailing.distribution import distribute_pairs
 from bot_app.mailing.constants import Mailing
-
+from bot_app.mailing.distribution import distribute_pairs
 
 logger.add('bot_logs.log', rotation="30 MB", backtrace=True, diagnose=True)
 

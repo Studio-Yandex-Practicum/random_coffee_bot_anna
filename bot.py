@@ -1,17 +1,17 @@
+import asyncio
 from datetime import datetime
 
-import asyncio
 from aiogram import Dispatcher, types
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram.types import BotCommand
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from bot_app.core.config import bot, TIMEZONE
+from bot_app.core.config import TIMEZONE, bot
+from bot_app.core.constants import Commands, MailingInt, MailingStr, Messages
 from bot_app.database.engine import get_async_session, session_maker
-from bot_app.routers import main_router
 from bot_app.mailing.mailing import (meeting_reminder_mailing,
                                      newsletter_about_the_meeting)
 from bot_app.middleware.dp import DataBaseSession
-from bot_app.core. constants import MailingInt, MailingStr, Messages, Commands
+from bot_app.routers import main_router
 
 
 async def on_startup():
@@ -27,6 +27,7 @@ async def on_shutdown():
 COMMANDS = [
     BotCommand(command="/start", description=Commands.BOT_RESTART),
     BotCommand(command="/admin", description=Commands.ADMIN_PANEL),
+    BotCommand(command="/help", description=Commands.HELP),
 ]
 
 
