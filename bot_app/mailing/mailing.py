@@ -13,9 +13,6 @@ from bot_app.mailing.constants import Distribution, Mailing
 
 logger.add('bot_logs.log', rotation='500 MB', backtrace=True, diagnose=True)
 
-NO_ACTIVE = '''
-Проект "Кофе Вслепую" не работает из-за отсутствия активных участников.
-'''
 
 meet_inline_buttons = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -81,12 +78,12 @@ async def newsletter_about_the_meeting(session: AsyncSession):
         await meeting_mailing(session, data['pairs'])
     else:
         await bot.send_message(chat_id=settings.gen_admin_id,
-                               text=NO_ACTIVE)
+                               text=Mailing.NO_ACTIVE)
         logger.info(
             f'Send warning message to genadmin id {settings.gen_admin_id}'
-            )
+        )
     if data.get('no_pair'):
         await mailing_by_user_tg_id(
-            chat_id=data['no_pair'].tg_id, text=Distribution.TEXT_NO_PAIR
+            chat_id=data['no_pair'].tg_id, text=Mailing.TEXT_FOR_EXTRA
         )
         logger.info(f'Send sorry message to user {data["no_pair"].name}')

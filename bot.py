@@ -39,10 +39,10 @@ async def main() -> None:
 
     scheduler = AsyncIOScheduler(timezone=TIMEZONE)
     sql_session = await anext(get_async_session())
-    
+
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПН НУЖНО РАЗКОММЕНТИРОВАТЬ СЛЕД 2 СТРОКИ, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
-    scheduler.add_job(newsletter_about_the_meeting, args=(sql_session,),
-                      next_run_time=datetime.now())
+    # scheduler.add_job(newsletter_about_the_meeting, args=(sql_session,),
+    #                   next_run_time=datetime.now())
     # scheduler.add_job(
     #     newsletter_about_the_meeting, args=(sql_session,),
     #     trigger=MailingStr.TRIGGER,
@@ -51,28 +51,40 @@ async def main() -> None:
     #     minute=MailingInt.MAIL_TO_COUPLES_MIN
     # )
 
+    scheduler.add_job(newsletter_about_the_meeting, args=(sql_session,),
+                      trigger=MailingStr.TRIGGER, day_of_week='0-6',
+                      hour=10, minute=00)
+
+    scheduler.add_job(newsletter_about_the_meeting, args=(sql_session,),
+                      trigger=MailingStr.TRIGGER, day_of_week='0-6',
+                      hour=14, minute=00)
+
 # ДЛЯ ТЕСТИРОВАНИЯ РАССЫЛКИ НА ПТН НУЖНО РАЗКОММЕНТИРОВАТЬ СЛЕД 2 СТРОКИ, РАССЫЛКА БУДЕТ ПРОИСХОДИТЬ ПРИ ЗАПУСКЕ БОТА
-    scheduler.add_job(meeting_reminder_mailing, args=(
-        sql_session,), next_run_time=datetime.now())
+    # scheduler.add_job(meeting_reminder_mailing, args=(
+    #     sql_session,), next_run_time=datetime.now())
     # scheduler.add_job(
     #     meeting_reminder_mailing, args=(sql_session,),
     #     trigger=MailingStr.TRIGGER,
     #     day_of_week=MailingStr.REMIND_MAIL_DAY,
     #     hour=MailingInt.REMIND_MAIL_HOUR,
     #     minute=MailingInt.REMIND_MAIL_MIN)
-    # scheduler.add_job(meeting_reminder_mailing, args=(sql_session,),
-    #                   trigger=MailingStr.TRIGGER,
-    #                   day_of_week='0-6', hour=12, minute=00)
-    
-    # scheduler.add_job(meeting_reminder_mailing, args=(sql_session,),
-    #                   trigger=MailingStr.TRIGGER,
-    #                   day_of_week='0-6', hour=16, minute=00)
+
+    scheduler.add_job(meeting_reminder_mailing, args=(sql_session,),
+                      trigger=MailingStr.TRIGGER,
+                      day_of_week='0-6', hour=12, minute=00)
+
+    scheduler.add_job(meeting_reminder_mailing, args=(sql_session,),
+                      trigger=MailingStr.TRIGGER,
+                      day_of_week='0-6', hour=16, minute=00)
 
     scheduler.start()
 
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
-
+    try:
+        await dp.start_polling(bot,
+                               allowed_updates=dp.resolve_used_update_types())
+    finally:
+        await bot.session.close()
 
 asyncio.run(main())
