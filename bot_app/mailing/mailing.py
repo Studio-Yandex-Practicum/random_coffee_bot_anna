@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot_app.core.config import bot, settings
 from bot_app.database.models import User
 from bot_app.mailing.distribution import distribute_pairs
-from bot_app.mailing.constants import Distribution, Mailing
+from bot_app.mailing.constants import Mailing
 
 
 logger.add('bot_logs.log', rotation='500 MB', backtrace=True, diagnose=True)
@@ -84,6 +84,6 @@ async def newsletter_about_the_meeting(session: AsyncSession):
         )
     if data.get('no_pair'):
         await mailing_by_user_tg_id(
-            chat_id=data['no_pair'].tg_id, text=Mailing.TEXT_FOR_EXTRA
+            chat_id=data['no_pair'].tg_id, text=Mailing.TEXT_NO_PAIR
         )
         logger.info(f'Send sorry message to user {data["no_pair"].name}')
