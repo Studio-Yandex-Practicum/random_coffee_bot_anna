@@ -29,3 +29,6 @@ class Mailing(str, Enum):
         'Проект "Кофе Вслепую" не работает \n'
         'из-за отсутствия активных участников.'
     )
+
+    def __str__(self) -> str:
+        return str.__str__(self)

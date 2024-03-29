@@ -11,7 +11,7 @@ from bot_app.mailing.distribution import distribute_pairs
 from bot_app.mailing.constants import Mailing
 
 
-logger.add('bot_logs.log', rotation='500 MB', backtrace=True, diagnose=True)
+logger.add('bot_logs.log', rotation="30 MB", backtrace=True, diagnose=True)
 
 
 meet_inline_buttons = InlineKeyboardMarkup(

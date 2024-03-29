@@ -22,6 +22,9 @@ class AdminConsts(str, Enum):
     CANCEL_ADMIN = 'отменить'
     CANCSEL_MSG = 'Действия отменены'
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class InfoMessage(str, Enum):
     ABOUT_MSG = (
@@ -99,6 +102,9 @@ class BaseCommands(str, Enum):
         'Но в любой момент можете его возобновить 😊\n'
     ),
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class UserRegistration(str, Enum):
     REGISTER = 'Регистрация'
@@ -121,6 +127,9 @@ class UserRegistration(str, Enum):
     NAME_RULES = 'Имя должно содержать только буквы. Введите имя снова'
     LAST_NAME_RULES = 'Фамилия должна быть только из букв. Введите её заново.'
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class CallbacksHandler(str, Enum):
     MESSAGE_CALLBACK = 'Хорошо!'
@@ -134,4 +143,3 @@ class Texts(str, Enum):
 
     def __str__(self) -> str:
         return str.__str__(self)
-
