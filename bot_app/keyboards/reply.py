@@ -58,6 +58,13 @@ MAIN_MENU_DEACTIVE_KBRD = get_keyboard(
     sizes=[1, 1, 1]
 )
 
+MAIN_MENU_NOREG_KBRD = get_keyboard(
+    MainMenuKbrd.ABOUT_PROJECT,
+    MainMenuKbrd.OUR_COLLEAGUES,
+    Register.REGISTRATION,
+    sizes=[1, 1, 1]
+)
+
 
 ADMIN_KBRD = get_keyboard(
     AdminKbrd.USER_LIST,

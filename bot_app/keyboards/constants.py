@@ -7,6 +7,9 @@ class MainMenuKbrd(str, Enum):
     SUSPEND_PARTICIPATION = 'Приостановить участие',
     RENEW_PARTICIPATION = 'Возобновить участие',
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class AdminKbrd(str, Enum):
     USER_LIST = 'Список всех пользователей',
@@ -16,9 +19,15 @@ class AdminKbrd(str, Enum):
     ADD_ADMIN = 'Добавить пользователя в админы',
     REMOVE_ADMIN = 'Удалить пользователя из админов',
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class Register(str, Enum):
     REGISTRATION = 'Регистрация'
+
+    def __str__(self) -> str:
+        return str.__str__(self)
 
 
 class NextMoreKbrd(str, Enum):
@@ -26,11 +35,20 @@ class NextMoreKbrd(str, Enum):
     BACK_TO_MAIN_MENU = 'Главное меню',
     ANOTHER_COMMENT = 'Ещё комментарий',
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class CancelKbrd(str, Enum):
     CANCELLATION = 'Отмена',
     BACK = 'Назад',
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class OnlyKbrd(str, Enum):
     CANCEL = 'Отменить',
+
+    def __str__(self) -> str:
+        return str.__str__(self)

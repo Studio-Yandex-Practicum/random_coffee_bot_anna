@@ -21,6 +21,8 @@ class Timezone(str, Enum):
 class Messages(str, Enum):
     START_UP_MSG = 'Бот запущен'
     SHUT_DOWN_MSG = 'Бот лег'
+    ERROR_MSG_FOR_USER = 'Извините, я сломался :( Но меня уже чинят!'
+    GARBAGE_MSG = 'Извините, я вас не понимаю. Воспользуйтесь кнопками меню.'
 
     def __str__(self) -> str:
         return str.__str__(self)

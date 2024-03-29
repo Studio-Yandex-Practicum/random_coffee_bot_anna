@@ -14,11 +14,14 @@ class IsAdmin(Filter):
 
     async def __call__(self, message: types.Message, bot: Bot,
                        session: AsyncSession) -> bool:
+
+        if message.from_user.id == settings.gen_admin_id:
+            return True
         result = await session.execute(
             select(User).filter(User.tg_id == message.from_user.id)
         )
         user = result.scalars().one_or_none()
-        if user.is_admin or message.from_user.id == settings.gen_admin_id:
+        if user is not None and user.is_admin:
             return True
         else:
             return False
