@@ -1,13 +1,11 @@
-from bot_app.core.config import settings
-from sqlalchemy import (Boolean, CheckConstraint, ForeignKey, Integer, String,
-                        UniqueConstraint, select)
-from typing import List, Optional
+from typing import List
 
-# from asyncpg import DatabaseDroppedError
-from sqlalchemy.orm.session import make_transient
+from sqlalchemy import Boolean, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
-                            mapped_column)
+                            make_transient, mapped_column)
+
+from bot_app.core.config import settings
 
 USER = ('{name} '
         '{last_name}\n'
@@ -55,12 +53,10 @@ class User(Base):
         is_admin_text = ', админ' if self.is_admin else ''
         is_active_text = 'активен' if self.is_active else 'неактивен'
         return USER.format(
-            id=self.id,
             name=self.name,
             last_name=self.last_name,
             email=self.email,
             is_active=is_active_text,
-            tg_id=self.tg_id,
             is_admin=is_admin_text,
         )
 
@@ -71,9 +67,9 @@ class User(Base):
         result = await session.execute(
             select(User).filter(User.tg_id == settings.gen_admin_id)
         )
-        obj = result.scalars().one_or_none()
-        if obj:
-            obj.is_admin = True
+        user = result.scalars().one_or_none()
+        if user:
+            user.is_admin = True
         await session.commit()
 
     @staticmethod
@@ -102,14 +98,27 @@ class User(Base):
         return users.scalars().all()
 
     @staticmethod
-    async def activate_deactivate_user(session: AsyncSession, email: str):
-        """Activating/deactivating object."""
+    async def deactivate_user(session: AsyncSession, email: str):
+        """Deactivating object."""
         result = await session.execute(
             select(User).filter(User.email == email)
         )
-        obj = result.scalars().one_or_none()
-        if obj:
-            obj.is_active = not obj.is_active
+        user = result.scalars().one_or_none()
+        if user is not None:
+            user.is_active = False if user.is_active else user.is_active
+            await session.commit()
+            return True
+        return False
+
+    @staticmethod
+    async def activate_user(session: AsyncSession, email: str):
+        """Activating user."""
+        result = await session.execute(
+            select(User).filter(User.email == email)
+        )
+        user = result.scalars().one_or_none()
+        if user is not None:
+            user.is_active = True if not user.is_active else user.is_active
             await session.commit()
             return True
         return False
@@ -139,20 +148,19 @@ class User(Base):
         await session.commit()
 
     @staticmethod
-    async def set_is_sent_status_true(users: List, session: AsyncSession):
+    async def set_is_sent_status_true(users: List,
+                                      session: AsyncSession):
         """Changing is_sent status to True."""
         if len(users) > 0:
-            for sent in users:
-                sent.is_sent = True if not sent.is_sent else sent.is_sent
+            for user in users:
+                user.is_sent = True if not user.is_sent else user.is_sent
             await session.commit()
 
     @staticmethod
-    async def set_is_sent_status_false(
-        users: Optional[List],
-        session: AsyncSession
-    ):
+    async def set_is_sent_status_false(users: List,
+                                       session: AsyncSession):
         """Changing is_sent status to False."""
-        if users is not None:
-            for sent in users:
-                sent.is_sent = False
+        if len(users) > 0:
+            for user in users:
+                user.is_sent = False if user.is_sent else user.is_sent
             await session.commit()

@@ -1,4 +1,3 @@
-"""Database settings."""
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from bot_app.core.config import settings

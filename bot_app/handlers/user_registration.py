@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bot_app.core.constants import Messages, LoggingSettings
 from bot_app.keyboards.reply import (
     REGISTER_KBRD,
     MAIN_MENU_ACTIVE_KBRD,
@@ -13,9 +14,11 @@ from bot_app.keyboards.reply import (
 from bot_app.database.models import User
 from bot_app.handlers.constants import UserRegistration, Texts
 
-logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
-
+logger.add(LoggingSettings.FILE_NAME,
+           rotation=LoggingSettings.ROTATION,
+           backtrace=True,
+           diagnose=True)
 user_reg_router = Router()
 
 
@@ -25,9 +28,9 @@ class AddUser(StatesGroup):
     email = State()
 
     texts = {
-        'AddUser:name': Texts.ENTER_NAME.value,
-        'AddUser:last_name': Texts.ENTER_LAST_NAME.value,
-        'AddUser:mail': Texts.ENTER_EMAIL.value,
+        'AddUser:name': Texts.ENTER_NAME,
+        'AddUser:last_name': Texts.ENTER_LAST_NAME,
+        'AddUser:mail': Texts.ENTER_EMAIL,
     }
 
 
@@ -54,6 +57,7 @@ async def add_name(
             )
             await state.set_state(AddUser.name)
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in add_name function: {e}")
 
 
@@ -72,6 +76,7 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
             reply_markup=REGISTER_KBRD
         )
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in cancel_handler function: {e}")
 
 
@@ -96,6 +101,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
                 return
             previous = step
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in back_step_handler function: {e}")
 
 
@@ -112,6 +118,7 @@ async def add_last_name(message: types.Message, state: FSMContext):
             await message.answer(UserRegistration.NAME_RULES)
             await state.set_state(AddUser.name)
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in add_last_name function: {e}")
 
 
@@ -128,6 +135,7 @@ async def add_mail(message: types.Message, state: FSMContext):
             await message.answer(UserRegistration.LAST_NAME_RULES)
             await state.set_state(AddUser.last_name)
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in add_mail function: {e}")
 
 
@@ -140,11 +148,11 @@ async def refister(
 ):
     """End of registration."""
     try:
-        tg_user = await User.get_by_email(session, message.text)
-        if tg_user:
+        tg_user = await User.get_by_email(session, message.text.lower())
+        if tg_user is not None:
             await message.answer(UserRegistration.EMAIL_EXIST)
         else:
-            await state.update_data(email=message.text)
+            await state.update_data(email=message.text.lower())
             data = await state.get_data()
             data['tg_id'] = message.from_user.id
             await User.create(session, data)
@@ -154,6 +162,7 @@ async def refister(
                 reply_markup=MAIN_MENU_ACTIVE_KBRD
             )
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in refister function: {e}")
 
 
@@ -163,6 +172,7 @@ async def invalid_mail(message: types.Message, state: FSMContext):
     try:
         await message.answer(UserRegistration.INVALID_EMAIL)
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in invalid_mail function: {e}")
 
 

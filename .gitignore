@@ -163,3 +163,5 @@ cython_debug/
 .vscode/
 
 random_coffe_bot.db
+
+logging.log

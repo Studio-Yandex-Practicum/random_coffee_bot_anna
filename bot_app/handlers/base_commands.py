@@ -3,19 +3,25 @@ from aiogram.filters import CommandStart
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from aiogram.filters import StateFilter
+from bot_app.core.constants import Messages, LoggingSettings
 from bot_app.database.models import User
 from bot_app.keyboards.reply import (
     REGISTER_KBRD,
     NEXT_KBRD,
     MORE_KBRD,
     MAIN_MENU_ACTIVE_KBRD,
-    MAIN_MENU_DEACTIVE_KBRD
+    MAIN_MENU_DEACTIVE_KBRD,
+    MAIN_MENU_NOREG_KBRD
 )
 from bot_app.handlers.constants import BaseCommands, InfoMessage
+from bot_app.filters.other_messages import OtherMsgsFilter
 
-logger.add("error_logs.log", rotation="500 MB", backtrace=True, diagnose=True)
 
-
+logger.add(LoggingSettings.FILE_NAME,
+           rotation=LoggingSettings.ROTATION,
+           backtrace=True,
+           diagnose=True)
 base_commands_router = Router()
 
 
@@ -24,7 +30,7 @@ async def start(message: types.Message, session: AsyncSession):
     """Command /start."""
     try:
         tg_user = await User.get(session, message.from_user.id)
-        if tg_user:
+        if tg_user is not None:
             if tg_user.is_active:
                 await message.answer(
                     InfoMessage.START_MSG,
@@ -41,6 +47,7 @@ async def start(message: types.Message, session: AsyncSession):
                 reply_markup=REGISTER_KBRD
             )
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in start function: {e}")
 
 
@@ -50,6 +57,7 @@ async def about(message: types.Message):
     try:
         await message.answer(InfoMessage.ABOUT_MSG)
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in about function: {e}")
 
 
@@ -62,6 +70,7 @@ async def about_coll(message: types.Message):
             reply_markup=NEXT_KBRD
         )
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in about_coll function: {e}")
 
 
@@ -74,6 +83,7 @@ async def aboutss(message: types.Message):
             reply_markup=MORE_KBRD
         )
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in aboutss function: {e}")
 
 
@@ -86,6 +96,7 @@ async def about_one(message: types.Message):
             reply_markup=MAIN_MENU_ACTIVE_KBRD
         )
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in about_one function: {e}")
 
 
@@ -94,7 +105,12 @@ async def menu(message: types.Message, session: AsyncSession):
     """Return to main menu."""
     try:
         tg_user = await User.get(session, message.from_user.id)
-        if tg_user.is_active:
+        if tg_user is None:
+            await message.answer(
+                BaseCommands.RETURN_TO_MENU,
+                reply_markup=MAIN_MENU_NOREG_KBRD
+            )
+        elif tg_user.is_active:
             await message.answer(
                 BaseCommands.RETURN_TO_MENU,
                 reply_markup=MAIN_MENU_ACTIVE_KBRD
@@ -105,15 +121,16 @@ async def menu(message: types.Message, session: AsyncSession):
                 reply_markup=MAIN_MENU_DEACTIVE_KBRD
             )
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in menu function: {e}")
 
 
 @base_commands_router.message(F.text == BaseCommands.STOP_PARTICIPATE)
-async def stop(message: types.Message, session: AsyncSession):
+async def stop_activation(message: types.Message, session: AsyncSession):
     """Stop participation."""
     try:
         tg_user = await User.get(session, int(message.from_user.id))
-        if await User.activate_deactivate_user(session, tg_user.email):
+        if await User.deactivate_user(session, tg_user.email):
             await message.answer(
                 BaseCommands.STOP_PARTICIPATE_MSG,
                 reply_markup=MAIN_MENU_DEACTIVE_KBRD
@@ -121,15 +138,16 @@ async def stop(message: types.Message, session: AsyncSession):
         else:
             await message.answer(BaseCommands.CANT_STOP)
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in stop function: {e}")
 
 
 @base_commands_router.message(F.text == BaseCommands.RESTART_PARTICIPATE)
-async def up(message: types.Message, session: AsyncSession):
+async def resume_activation(message: types.Message, session: AsyncSession):
     """Resume participation."""
     try:
         tg_user = await User.get(session, int(message.from_user.id))
-        if await User.activate_deactivate_user(session, tg_user.email):
+        if await User.activate_user(session, tg_user.email):
             await message.answer(
                 BaseCommands.RESTART_PARTICIPATE_MSG,
                 reply_markup=MAIN_MENU_ACTIVE_KBRD
@@ -137,4 +155,11 @@ async def up(message: types.Message, session: AsyncSession):
         else:
             await message.answer(BaseCommands.CANT_RESTART_PARTICIPATE)
     except Exception as e:
+        await message.answer(Messages.ERROR_MSG_FOR_USER)
         logger.error(f"Error in up function: {e}")
+
+
+@base_commands_router.message(StateFilter(None), OtherMsgsFilter())
+async def answer_garbage_msg(message: types.Message):
+    '''Answer to all not commands and buttons messages.'''
+    await message.answer(Messages.GARBAGE_MSG)

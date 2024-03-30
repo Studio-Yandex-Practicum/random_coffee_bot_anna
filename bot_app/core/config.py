@@ -1,4 +1,3 @@
-"""Project settings."""
 import pytz
 from aiogram import Bot
 from aiogram.client.bot import DefaultBotProperties
