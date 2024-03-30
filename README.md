@@ -115,7 +115,11 @@ sudo systemctl restart file_name.service
 ## Команда разработки
 
 [Анна Победоносцева](https://github.com/ZebraHr) (тимлид команды)
+
 [Светлана Шатунова](https://github.com/SvShatunova) (разработчик)
+
 [Ольга Скрябина](https://github.com/ibonish) (разработчик)
+
 [Татьяна Мусатова](https://github.com/Tatiana314) (разработчик)
+
 [Никита Пискунов](https://github.com/Nikitkosss) (разработчик)
