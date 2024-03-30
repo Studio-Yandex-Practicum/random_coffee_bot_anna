@@ -85,7 +85,7 @@ async def delete_user_id(
     """Removing user by email."""
     try:
         await state.update_data(email=message.text.lower())
-        tg_user = await User.get_by_email(session, message.text.lower())
+        tg_user = await User.get_by_email(session, message.text)
         if tg_user is not None:
             if await User.remove(session, tg_user):
                 await message.answer(

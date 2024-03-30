@@ -75,6 +75,7 @@ async def meeting_reminder_mailing(session: AsyncSession):
 
 
 async def newsletter_about_the_meeting(session: AsyncSession):
+    """Mailing about meetings."""
     data = await distribute_pairs(session)
     if data.get('pairs') is not None:
         await meeting_mailing(session, data['pairs'])
