@@ -1,4 +1,3 @@
-import asyncio
 from aiogram import F, Router, types
 from bot_app.core.config import bot
 from bot_app.core.constants import Messages, LoggingSettings

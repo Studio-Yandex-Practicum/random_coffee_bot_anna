@@ -23,8 +23,8 @@ async def on_shutdown():
 
 
 COMMANDS = [
-    BotCommand(command="/start", description=Commands.BOT_RESTART),
-    BotCommand(command="/admin", description=Commands.ADMIN_PANEL),
+    BotCommand(command='/start', description=Commands.BOT_RESTART),
+    BotCommand(command='/admin', description=Commands.ADMIN_PANEL),
 ]
 
 

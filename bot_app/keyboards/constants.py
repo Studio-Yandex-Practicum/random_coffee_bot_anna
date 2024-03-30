@@ -16,8 +16,8 @@ class AdminKbrd(str, Enum):
     DELETE_USER = 'Удалить пользователя',
     DEACTIVATE_USER = 'Деактивировать пользователя',
     MAIN_MENU = 'Главное меню',
-    ADD_ADMIN = 'Добавить пользователя в админы',
-    REMOVE_ADMIN = 'Удалить пользователя из админов',
+    ADD_ADMIN = 'Добавить администратора',
+    REMOVE_ADMIN = 'Удалить администратора',
 
     def __str__(self) -> str:
         return str.__str__(self)
