@@ -12,6 +12,7 @@ from bot_app.middleware.dp import DataBaseSession
 from bot_app.core. constants import MailingInt, MailingStr, Messages, Commands
 
 
+
 async def on_startup():
     """Startup message."""
     print(Messages.START_UP_MSG)
