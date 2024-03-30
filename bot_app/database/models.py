@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import Boolean, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
@@ -65,9 +67,9 @@ class User(Base):
         result = await session.execute(
             select(User).filter(User.tg_id == settings.gen_admin_id)
         )
-        obj = result.scalars().one_or_none()
-        if obj:
-            obj.is_admin = True
+        user = result.scalars().one_or_none()
+        if user:
+            user.is_admin = True
         await session.commit()
 
     @staticmethod
@@ -96,14 +98,27 @@ class User(Base):
         return users.scalars().all()
 
     @staticmethod
-    async def activate_deactivate_user(session: AsyncSession, email: str):
-        """Activating/deactivating object."""
+    async def deactivate_user(session: AsyncSession, email: str):
+        """Deactivating object."""
         result = await session.execute(
             select(User).filter(User.email == email)
         )
-        obj = result.scalars().one_or_none()
-        if obj:
-            obj.is_active = not obj.is_active
+        user = result.scalars().one_or_none()
+        if user is not None:
+            user.is_active = False if user.is_active else user.is_active
+            await session.commit()
+            return True
+        return False
+
+    @staticmethod
+    async def activate_user(session: AsyncSession, email: str):
+        """Activating user."""
+        result = await session.execute(
+            select(User).filter(User.email == email)
+        )
+        user = result.scalars().one_or_none()
+        if user is not None:
+            user.is_active = True if not user.is_active else user.is_active
             await session.commit()
             return True
         return False
@@ -131,3 +146,21 @@ class User(Base):
         make_transient(user)
         session.add(user)
         await session.commit()
+
+    @staticmethod
+    async def set_is_sent_status_true(users: List,
+                                      session: AsyncSession):
+        """Changing is_sent status to True."""
+        if len(users) > 0:
+            for user in users:
+                user.is_sent = True if not user.is_sent else user.is_sent
+            await session.commit()
+
+    @staticmethod
+    async def set_is_sent_status_false(users: List,
+                                       session: AsyncSession):
+        """Changing is_sent status to False."""
+        if len(users) > 0:
+            for user in users:
+                user.is_sent = False if user.is_sent else user.is_sent
+            await session.commit()

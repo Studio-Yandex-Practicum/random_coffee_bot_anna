@@ -4,7 +4,7 @@ from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aiogram.filters import StateFilter
-from bot_app.core.constants import Messages
+from bot_app.core.constants import Messages, LoggingSettings
 from bot_app.database.models import User
 from bot_app.keyboards.reply import (
     REGISTER_KBRD,
@@ -17,9 +17,11 @@ from bot_app.keyboards.reply import (
 from bot_app.handlers.constants import BaseCommands, InfoMessage
 from bot_app.filters.other_messages import OtherMsgsFilter
 
-logger.add("error_logs.log", rotation="30 MB", backtrace=True, diagnose=True)
 
-
+logger.add(LoggingSettings.FILE_NAME,
+           rotation=LoggingSettings.ROTATION,
+           backtrace=True,
+           diagnose=True)
 base_commands_router = Router()
 
 
@@ -124,11 +126,11 @@ async def menu(message: types.Message, session: AsyncSession):
 
 
 @base_commands_router.message(F.text == BaseCommands.STOP_PARTICIPATE)
-async def stop(message: types.Message, session: AsyncSession):
+async def stop_activation(message: types.Message, session: AsyncSession):
     """Stop participation."""
     try:
         tg_user = await User.get(session, int(message.from_user.id))
-        if await User.activate_deactivate_user(session, tg_user.email):
+        if await User.deactivate_user(session, tg_user.email):
             await message.answer(
                 BaseCommands.STOP_PARTICIPATE_MSG,
                 reply_markup=MAIN_MENU_DEACTIVE_KBRD
@@ -141,11 +143,11 @@ async def stop(message: types.Message, session: AsyncSession):
 
 
 @base_commands_router.message(F.text == BaseCommands.RESTART_PARTICIPATE)
-async def up(message: types.Message, session: AsyncSession):
+async def resume_activation(message: types.Message, session: AsyncSession):
     """Resume participation."""
     try:
         tg_user = await User.get(session, int(message.from_user.id))
-        if await User.activate_deactivate_user(session, tg_user.email):
+        if await User.activate_user(session, tg_user.email):
             await message.answer(
                 BaseCommands.RESTART_PARTICIPATE_MSG,
                 reply_markup=MAIN_MENU_ACTIVE_KBRD
@@ -158,6 +160,6 @@ async def up(message: types.Message, session: AsyncSession):
 
 
 @base_commands_router.message(StateFilter(None), OtherMsgsFilter())
-async def answer_garbage_msg(message: types.Message, session: AsyncSession):
+async def answer_garbage_msg(message: types.Message):
     '''Answer to all not commands and buttons messages.'''
     await message.answer(Messages.GARBAGE_MSG)

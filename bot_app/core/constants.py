@@ -13,9 +13,15 @@ class MailingStr(str, Enum):
     MAIL_TO_COUPLES_DAY = 'mon'
     REMIND_MAIL_DAY = 'thu'
 
+    def __str__(self) -> str:
+        return str.__str__(self)
+
 
 class Timezone(str, Enum):
     TIMEZONE_MOSCOW = 'Europe/Moscow'
+
+    def __str__(self) -> str:
+        return str.__str__(self)
 
 
 class Messages(str, Enum):
@@ -31,3 +37,14 @@ class Messages(str, Enum):
 class Commands(str, Enum):
     BOT_RESTART = 'Перезапустить бота'
     ADMIN_PANEL = 'Панель администратора'
+
+    def __str__(self) -> str:
+        return str.__str__(self)
+
+
+class LoggingSettings(str, Enum):
+    FILE_NAME = 'logging.log'
+    ROTATION = '30 MB'
+
+    def __str__(self) -> str:
+        return str.__str__(self)

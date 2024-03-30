@@ -6,12 +6,16 @@ from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot_app.core.config import bot, settings
+from bot_app.core.constants import LoggingSettings
 from bot_app.database.models import User
 from bot_app.mailing.distribution import distribute_pairs
 from bot_app.mailing.constants import Mailing
 
 
-logger.add('bot_logs.log', rotation="30 MB", backtrace=True, diagnose=True)
+logger.add(LoggingSettings.FILE_NAME,
+           rotation=LoggingSettings.ROTATION,
+           backtrace=True,
+           diagnose=True)
 
 
 meet_inline_buttons = InlineKeyboardMarkup(
@@ -46,14 +50,12 @@ async def meeting_mailing(
             text=Mailing.MEETING_MESSAGE.format(
                 pair[1].name, pair[1].last_name, pair[1].email
             ))
-        pair[0].is_sent = True
         await mailing_by_user_tg_id(
             chat_id=pair[1].tg_id,
             text=Mailing.MEETING_MESSAGE.format(
                 pair[0].name, pair[0].last_name, pair[0].email
             ))
-        pair[1].is_sent = True
-        await session.commit()
+        await User.set_is_sent_status_true(pair, session)
         logger.info(
             f'Send meeting message to users {pair[0].name} and {pair[1].name}'
         )
@@ -61,20 +63,20 @@ async def meeting_mailing(
 
 async def meeting_reminder_mailing(session: AsyncSession):
     """Remainder mailing."""
-    for user in await User.get_all_is_sent(session):
+    users = await User.get_all_is_sent(session)
+    for user in users:
         await mailing_by_user_tg_id(
             chat_id=user.tg_id,
             text=Mailing.REMINDER_MAILING,
             inline_buttons=meet_inline_buttons
         )
-        user.is_sent = False
-        await session.commit()
         logger.info(f'Send reminder message to user {user.name}')
+    await User.set_is_sent_status_false(users, session)
 
 
 async def newsletter_about_the_meeting(session: AsyncSession):
     data = await distribute_pairs(session)
-    if data.get('pairs'):
+    if data.get('pairs') is not None:
         await meeting_mailing(session, data['pairs'])
     else:
         await bot.send_message(chat_id=settings.gen_admin_id,
@@ -82,7 +84,7 @@ async def newsletter_about_the_meeting(session: AsyncSession):
         logger.info(
             f'Send warning message to genadmin id {settings.gen_admin_id}'
         )
-    if data.get('no_pair'):
+    if data.get('no_pair') is not None:
         await mailing_by_user_tg_id(
             chat_id=data['no_pair'].tg_id, text=Mailing.TEXT_NO_PAIR
         )

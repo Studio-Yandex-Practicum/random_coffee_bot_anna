@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import Iterable, List, Dict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,13 +12,16 @@ def get_unique_pairs(users: Iterable) -> List[tuple]:
     )
 
 
-async def distribute_pairs(session: AsyncSession) -> dict:
-    """Distributes pairs of users.."""
+async def distribute_pairs(session: AsyncSession) -> Dict:
+    """Distributes pairs of users."""
     actives = await User.get_all_activated(session)
-    if actives:
+    if len(actives) <= 1:
+        return {}
+    if len(actives) > 1:
         await User.first_to_end_db(actives[0], session)
-    if not len(actives) % 2:
+    if len(actives) % 2 == 0:
         return {'pairs': get_unique_pairs(actives)}
-    no_pair = actives.pop(len(actives) // 2)
+    middle_idx = len(actives) // 2
+    no_pair = actives.pop(middle_idx)
     await User.first_to_end_db(no_pair, session)
     return {'pairs': get_unique_pairs(actives), 'no_pair': no_pair}
