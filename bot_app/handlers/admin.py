@@ -7,16 +7,18 @@ from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot_app.core.constants import Messages
+from bot_app.core.constants import Messages, LoggingSettings
 from bot_app.database.models import User
 from bot_app.filters.is_admin import IsAdmin
 from bot_app.handlers.constants import AdminConsts
 from bot_app.keyboards.reply import ADMIN_KBRD, CANCEL_ONLY_KBRD
 from bot_app.handlers.user_registration import user_reg_router
 
-logger.add("error_logs.log", rotation="30 MB", backtrace=True, diagnose=True)
 
-
+logger.add(LoggingSettings.FILE_NAME,
+           rotation=LoggingSettings.ROTATION,
+           backtrace=True,
+           diagnose=True)
 admin_router = Router()
 
 
@@ -84,7 +86,7 @@ async def delete_user_id(
     try:
         await state.update_data(email=message.text.lower())
         tg_user = await User.get_by_email(session, message.text.lower())
-        if tg_user:
+        if tg_user is not None:
             if await User.remove(session, tg_user):
                 await message.answer(
                     AdminConsts.DELETE_COMPLITE,
@@ -124,7 +126,7 @@ async def deactivate_user_id(
     """Deactivating user by email."""
     try:
         await state.update_data(email=message.text.lower())
-        deactive = await User.activate_deactivate_user(session, message.text.lower())
+        deactive = await User.deactivate_user(session, message.text.lower())
         if deactive:
             await message.answer(
                 AdminConsts.DEACTIVATE_COMPLITE,

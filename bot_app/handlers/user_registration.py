@@ -5,7 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot_app.core.constants import Messages
+from bot_app.core.constants import Messages, LoggingSettings
 from bot_app.keyboards.reply import (
     REGISTER_KBRD,
     MAIN_MENU_ACTIVE_KBRD,
@@ -14,9 +14,11 @@ from bot_app.keyboards.reply import (
 from bot_app.database.models import User
 from bot_app.handlers.constants import UserRegistration, Texts
 
-logger.add("error_logs.log", rotation="30 MB", backtrace=True, diagnose=True)
 
-
+logger.add(LoggingSettings.FILE_NAME,
+           rotation=LoggingSettings.ROTATION,
+           backtrace=True,
+           diagnose=True)
 user_reg_router = Router()
 
 
@@ -147,7 +149,7 @@ async def refister(
     """End of registration."""
     try:
         tg_user = await User.get_by_email(session, message.text.lower())
-        if tg_user:
+        if tg_user is not None:
             await message.answer(UserRegistration.EMAIL_EXIST)
         else:
             await state.update_data(email=message.text.lower())
