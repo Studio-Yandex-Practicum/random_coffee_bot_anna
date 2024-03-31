@@ -112,6 +112,22 @@ sudo systemctl restart file_name.service
 ```
 sudo systemctl restart file_name.service
 ```
+Поменять дни и время рассылки можно в bot_app/core/constants.py
+```
+class MailingInt(IntEnum):
+    MAIL_TO_COUPLES_HOUR = 10  - время рассылки для пар (часы)
+    MAIL_TO_COUPLES_MIN = 00 - время рассылки для пар (минуты)
+    REMIND_MAIL_HOUR = 10  - время рассылки напоминания (часы)
+    REMIND_MAIL_MIN = 00  - время рассылки напоминания (минуты)
+
+
+class MailingStr(str, Enum):
+    TRIGGER = 'cron'
+    MAIL_TO_COUPLES_DAY = 'mon' - день расслыки для пар (принимает значения от 0 до 6, или mon, tue, wed, thu, fri, sat, sun, можно задать сразу несколько дней)
+    REMIND_MAIL_DAY = 'thu' - день расслыки с напоминанием (принимает значения от 0 до 6, или mon, tue, wed, thu, fri, sat, sun,  можно задать сразу несколько дней)
+```
+
+
 ## Команда разработки
 
 [Анна Победоносцева](https://github.com/ZebraHr) (тимлид команды)
