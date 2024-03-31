@@ -112,6 +112,7 @@ sudo systemctl restart file_name.service
 ```
 sudo systemctl restart file_name.service
 ```
+## Настройки рассылки
 Поменять дни и время рассылки можно в bot_app/core/constants.py
 ```
 class MailingInt(IntEnum):
