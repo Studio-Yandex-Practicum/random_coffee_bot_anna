@@ -3,3 +3,6 @@ venv
 db.sqlite3
 idea
 .vscode
+data/random_coffe_bot.db
+.gitignore
+.env
